@@ -1,0 +1,20 @@
+{{define "header"}}
+<div class="header">
+    <a href="/">
+        <img src="/static/images/logo.png" alt="Логотип Literary Lions" class="logo">
+    </a>
+    <nav>
+        <ul>
+            {{if .User}}
+                <li><a href="/user">{{.User.Username}}</a></li>
+                <li><a href="/logout">Выход</a></li>
+            {{else}}
+                <li><a href="/login">Войти</a></li>
+                <li><a href="/register">Регистрация</a></li>
+            {{end}}
+            <li><a href="/all_posts">Посты</a></li>
+            <li><a href="/categories">Categories</a></li>
+        </ul>
+    </nav>
+</div>
+{{end}}

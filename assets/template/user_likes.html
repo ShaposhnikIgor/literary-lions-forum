@@ -1,0 +1,28 @@
+{{define "user_likes"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лайки пользователя {{.UserID}}</title>
+    <link rel="stylesheet" href="/static/css/user_likes.css">
+</head>
+<body>
+    {{template "header" .}}
+    <div class="container">
+        <h1>Лайки пользователя {{.UserID}}</h1>
+        {{range .Likes}}
+            <div class="like">
+                {{if eq .TargetType "post"}}
+                    <p>Пост: <a href="/post/{{.TargetID}}">Посмотреть пост</a></p>
+                {{else if eq .TargetType "comment"}}
+                    <p>Комментарий: <a href="/comment/{{.TargetID}}">Посмотреть комментарий</a></p>
+                {{end}}
+            </div>
+        {{else}}
+            <p>Нет лайков.</p>
+        {{end}}
+    </div>
+</body>
+</html>
+{{end}}

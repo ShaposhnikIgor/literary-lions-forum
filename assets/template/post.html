@@ -1,0 +1,67 @@
+{{define "post"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Post.Title}}</title>
+    <link rel="stylesheet" href="/static/css/post.css">
+</head>
+<body>
+    {{template "header" .}}
+    <div class="container">
+        <h1>{{.Post.Title}}</h1>
+        <p><strong>Категория:</strong> {{.Post.CategoryID}}</p>
+        <p><strong>Автор:</strong> {{.Post.UserID}}</p>
+        <p>{{.Post.Body}}</p>
+        <p><small>Опубликовано: {{.Post.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+        <a href="/all_posts">Вернуться ко всем постам</a>
+
+         <!-- Like/Dislike buttons for the post -->
+         <form action="/like_dislike" method="POST" style="display: inline;">
+            <input type="hidden" name="target_id" value="{{.Post.ID}}">
+            <input type="hidden" name="target_type" value="post">
+            <input type="hidden" name="is_like" value="true">
+            <button type="submit">👍 Нравится</button>
+        </form>
+        <form action="/like_dislike" method="POST" style="display: inline;">
+            <input type="hidden" name="target_id" value="{{.Post.ID}}">
+            <input type="hidden" name="target_type" value="post">
+            <input type="hidden" name="is_like" value="false">
+            <button type="submit">👎 Не нравится</button>
+        </form>
+    </div>
+
+    <h3>Добавить комментарий</h3>
+<form action="/comment" method="POST">
+    <input type="hidden" name="post_id" value="{{.Post.ID}}">
+    <textarea name="body" required></textarea>
+    <button type="submit">Отправить</button>
+</form>
+
+<h3>Комментарии</h3>
+{{range .Comments}}
+    <div class="comment">
+        <p><strong>{{.UserID}}</strong>: {{.Body}}</p>
+        <p><small>Создано: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+        <!-- Like/Dislike buttons for each comment -->
+        <form action="/like_dislike" method="POST" style="display: inline;">
+            <input type="hidden" name="target_id" value="{{.ID}}">
+            <input type="hidden" name="target_type" value="comment">
+            <input type="hidden" name="is_like" value="true">
+            <button type="submit">👍 Нравится</button>
+        </form>
+        <form action="/like_dislike" method="POST" style="display: inline;">
+            <input type="hidden" name="target_id" value="{{.ID}}">
+            <input type="hidden" name="target_type" value="comment">
+            <input type="hidden" name="is_like" value="false">
+            <button type="submit">👎 Не нравится</button>
+        </form>
+    </div>
+{{else}}
+    <p>Нет комментариев.</p>
+{{end}}
+
+</body>
+</html>
+{{end}}
