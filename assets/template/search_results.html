@@ -1,0 +1,26 @@
+{{define "search_results"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все посты</title>
+    <link rel="stylesheet" href="/static/css/all_posts.css">
+</head>
+<body>
+    {{template "header" .}}
+    <h3>Результаты поиска для: "{{.Query}}"</h3>
+{{if .Results}}
+    <ul>
+        {{range .Results}}
+            <li>
+                <a href="/post/{{.ID}}">{{.Title}}</a> - {{.CreatedAt.Format "02.01.2006"}}
+            </li>
+        {{end}}
+    </ul>
+{{else}}
+    <p>Нет результатов по вашему запросу.</p>
+{{end}}
+</body>
+</html>
+{{end}}

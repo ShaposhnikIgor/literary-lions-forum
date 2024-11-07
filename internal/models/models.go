@@ -57,36 +57,62 @@ type LikeDislike struct {
 }
 
 type IndexPageData struct {
-	Posts []Post
-	User  *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Posts      []Post
+	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Categories []Category
 }
 
 type PostsPageData struct {
-	Posts []Post
-	User  *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Posts      []Post
+	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Categories []Category
 }
 
 type PostPageData struct {
-	Post     Post
-	User     *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
-	Comments []Comment
+	Post          Post
+	User          *User
+	Comments      []Comment
+	PostLikes     int
+	PostDislikes  int
+	CommentCounts map[int]LikeDislikeCount
+	Categories    []Category
+}
+
+type LikeDislikeCount struct {
+	Likes    int
+	Dislikes int
+}
+
+type NewPostPageData struct {
+	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Categories []Category
 }
 
 type LoginPageData struct {
-	Error string
-	User  *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Error      string
+	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	Categories []Category
 }
 
 type RegisterPageData struct {
 	CaptchaQuestion string // Вопрос для отображения капчи
 	User            *User  // Данные пользователя, могут быть nil, если пользователь не залогинен
+	Categories      []Category
 }
 
 type UserPageData struct {
-	User *User // Данные пользователя, могут быть nil, если пользователь не залогинен
+	User       *User // Данные пользователя, могут быть nil, если пользователь не залогинен
+	Categories []Category
 }
 
 type UserCommentsPageData struct {
 	User     *User
 	Comments []Comment
+}
+
+type SearchResultsPageData struct {
+	Query      string
+	Results    []Post
+	User       *User
+	Categories []Category
 }

@@ -73,6 +73,14 @@ func main() {
 		handlers.CreateCommentHandler(w, r, db)
 	})
 
+	http.HandleFunc("/new-post", func(w http.ResponseWriter, r *http.Request) {
+		handlers.NewPostHandler(w, r, db)
+	})
+
+	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+		handlers.SearchHandler(w, r, db)
+	})
+
 	// http.HandleFunc("/post", handlers.CreatePostHandler).Methods("POST")
 	// http.HandleFunc("/comment", handlers.CreateComment).Methods("POST")
 	// http.HandleFunc("/posts/filter", forum.FilterPostsHandler).Methods("GET")

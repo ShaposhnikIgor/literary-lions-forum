@@ -17,6 +17,9 @@
         <p><small>Опубликовано: {{.Post.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
         <a href="/all_posts">Вернуться ко всем постам</a>
 
+        <!-- Display like/dislike counts for the post -->
+        <p>👍 {{.PostLikes}} | 👎 {{.PostDislikes}}</p>
+
          <!-- Like/Dislike buttons for the post -->
          <form action="/like_dislike" method="POST" style="display: inline;">
             <input type="hidden" name="target_id" value="{{.Post.ID}}">
@@ -44,6 +47,10 @@
     <div class="comment">
         <p><strong>{{.UserID}}</strong>: {{.Body}}</p>
         <p><small>Создано: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+        <!-- Display like/dislike counts for the comment -->
+        <p>👍 Likes: {{ (index $.CommentCounts .ID).Likes }}</p>
+        <p>👎 Dislikes: {{ (index $.CommentCounts .ID).Dislikes }}</p>
+
         <!-- Like/Dislike buttons for each comment -->
         <form action="/like_dislike" method="POST" style="display: inline;">
             <input type="hidden" name="target_id" value="{{.ID}}">

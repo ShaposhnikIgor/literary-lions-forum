@@ -2,46 +2,43 @@ package handlers
 
 import (
 	"database/sql"
-	//"fmt"
+	"html/template"
 	models "literary-lions/internal/models"
 	"log"
 	"net/http"
-	"text/template"
+	"strings"
 )
 
-func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-		return
+func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	query := r.URL.Query().Get("query")
+	category := r.URL.Query().Get("category")
+
+	// Search logic here, e.g., search for posts or comments containing the query
+	var results []models.Post
+	var queryBuilder strings.Builder
+	queryBuilder.WriteString("SELECT id, title, body, created_at FROM posts WHERE title LIKE ? OR body LIKE ?")
+	params := []interface{}{"%" + query + "%", "%" + query + "%"}
+
+	if category != "" {
+		queryBuilder.WriteString(" AND category_id = ?")
+		params = append(params, category)
 	}
 
-	if r.URL.Path != "/" {
-		http.Error(w, "Страница не найдена", http.StatusNotFound)
-		return
-	}
-
-	// Получение постов из базы данных
-	rows, err := db.Query("SELECT id, title FROM posts ORDER BY created_at DESC LIMIT 10")
+	rows, err := db.Query(queryBuilder.String(), params...)
 	if err != nil {
-		log.Printf("Ошибка при Получение постов из базы данных: %v", err) // Логирование детали ошибки
-		http.Error(w, "Ошибка базы данных", http.StatusInternalServerError)
+		log.Printf("Ошибка при поиске: %v", err)
+		http.Error(w, "Ошибка поиска", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Title); err != nil {
-			http.Error(w, "Ошибка при чтении данных", http.StatusInternalServerError)
-			return
+		if err := rows.Scan(&post.ID, &post.Title, &post.Body, &post.CreatedAt); err != nil {
+			log.Printf("Ошибка при чтении поста: %v", err)
+			continue
 		}
-		posts = append(posts, post)
-	}
-
-	if err := rows.Err(); err != nil {
-		http.Error(w, "Ошибка при обработке запроса", http.StatusInternalServerError)
-		return
+		results = append(results, post)
 	}
 
 	// Проверка на наличие сессии пользователя
@@ -85,27 +82,26 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Создаем структуру для передачи в шаблон
-	pageData := models.IndexPageData{
-		Posts:      posts,
-		User:       user, // может быть nil, если пользователь не залогинен
+	// Create a page data object with results
+	pageData := models.SearchResultsPageData{
+		Query:      query,
+		Results:    results,
+		User:       user,
 		Categories: categories,
 	}
 
-	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/index.html")
+	// Render the results page
+	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/search_results.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
 		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
 		return
 	}
 
-	// Set the content type
-	w.Header().Set("Content-Type", "text/html")
-
-	// Execute the "index" template as the main entry point
-	err = tmpl.ExecuteTemplate(w, "index", pageData) // specify "index" here
+	// Render the search results page
+	err = tmpl.ExecuteTemplate(w, "search_results", pageData)
 	if err != nil {
-		log.Printf("Ошибка рендеринга: %v", err)
+		log.Printf("Ошибка рендеринга страницы: %v", err)
 		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
 		return
 	}

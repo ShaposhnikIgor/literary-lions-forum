@@ -1,0 +1,30 @@
+{{define "new_post"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать пост</title>
+</head>
+<body>
+    {{template "header" .}}
+    <h1>Создать новый пост</h1>
+    <form action="/new-post" method="POST">
+        <label for="title">Заголовок:</label>
+        <input type="text" name="title" id="title" required>
+        <br>
+        <label for="body">Текст:</label>
+        <textarea name="body" id="body" required></textarea>
+        <br>
+        <label for="category_id">Категория:</label>
+        <select name="category_id" id="category_id" required>
+            {{range .Categories}}
+                <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+        </select>
+        <br>
+        <button type="submit">Опубликовать</button>
+    </form>
+</body>
+</html>
+{{end}}

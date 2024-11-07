@@ -43,22 +43,6 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			MaxAge: 60,
 		})
 
-		// // Подключаем шаблон страницы регистрации
-		// tmpl, err := template.ParseFiles("assets/template/register.html")
-		// if err != nil {
-		// 	log.Printf("Ошибка загрузки шаблона: %v", err)
-		// 	http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// // Рендерим страницу с капчей
-		// w.Header().Set("Content-Type", "text/html")
-		// err = tmpl.Execute(w, map[string]string{"CaptchaQuestion": captcha.Question})
-		// if err != nil {
-		// 	http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
-		// 	return
-		// }
-
 		// Проверка на наличие сессии пользователя
 		var user *models.User
 		cookie, err := r.Cookie("session_token")
@@ -74,10 +58,37 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			}
 		}
 
+		// Fetch categories from the database
+		rowsCategory, err := db.Query("SELECT id, name FROM categories")
+		if err != nil {
+			log.Printf("Ошибка загрузки категорий: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+		defer rowsCategory.Close()
+
+		var categories []models.Category
+		for rowsCategory.Next() {
+			var category models.Category
+			if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+				log.Printf("Ошибка при чтении категории: %v", err)
+				http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+				return
+			}
+			categories = append(categories, category)
+		}
+
+		if err := rowsCategory.Err(); err != nil {
+			log.Printf("Ошибка при обработке категорий: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+
 		// Создаем структуру для передачи в шаблон
 		pageData := models.RegisterPageData{
 			CaptchaQuestion: captcha.Question, // Вопрос капчи
 			User:            user,             // может быть nil, если пользователь не залогинен
+			Categories:      categories,
 		}
 
 		// Загрузка шаблонов header и register

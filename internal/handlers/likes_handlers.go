@@ -85,6 +85,26 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Write([]byte("Успешно обновлено"))
 }
 
+// CountLikes returns the count of likes for a given target.
+func CountLikes(db *sql.DB, targetID int, targetType string) (int, error) {
+	var count int
+	err := db.QueryRow(`
+		SELECT COUNT(*) FROM likes_dislikes
+		WHERE target_id = ? AND target_type = ? AND is_like = 1
+	`, targetID, targetType).Scan(&count)
+	return count, err
+}
+
+// CountDislikes returns the count of dislikes for a given target.
+func CountDislikes(db *sql.DB, targetID int, targetType string) (int, error) {
+	var count int
+	err := db.QueryRow(`
+		SELECT COUNT(*) FROM likes_dislikes
+		WHERE target_id = ? AND target_type = ? AND is_like = 0
+	`, targetID, targetType).Scan(&count)
+	return count, err
+}
+
 func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Get the user_id from the query parameter
 	userIDStr := r.URL.Query().Get("user_id")
@@ -164,60 +184,3 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 }
-
-// import (
-// 	"literary-lions-forum/internal/models"
-// 	"net/http"
-// 	"strconv"
-// )
-
-// func LikePostHandler(w http.ResponseWriter, r *http.Request) {
-// 	postIDStr := r.FormValue("post_id")
-
-// 	// Convert postID from string to int
-// 	postID, err := strconv.Atoi(postIDStr)
-// 	if err != nil {
-// 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	userID, err := models.GetCurrentUserID(r)
-// 	if err != nil {
-// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	err = models.LikePost(postID, userID)
-// 	if err != nil {
-// 		http.Error(w, "Failed to like post", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	http.Redirect(w, r, "/", http.StatusSeeOther)
-// }
-
-// func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
-// 	// Convert postID from string to int
-// 	postIDStr := r.FormValue("post_id")
-// 	postID, err := strconv.Atoi(postIDStr)
-// 	if err != nil {
-// 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Get current user ID
-// 	userID, err := models.GetCurrentUserID(r)
-// 	if err != nil {
-// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	// Dislike the post
-// 	if err := models.DislikePost(postID, userID); err != nil {
-// 		http.Error(w, "Unable to dislike post", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Redirect after disliking
-// 	http.Redirect(w, r, "/", http.StatusSeeOther)
-// }

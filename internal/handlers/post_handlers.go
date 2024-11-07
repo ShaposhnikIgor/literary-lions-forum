@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"literary-lions/internal/models"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -85,11 +87,72 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	commentCounts := make(map[int]models.LikeDislikeCount)
+
+	for _, comment := range comments {
+		// Fetch the like and dislike counts for each comment
+		commentLikes, err := CountLikes(db, comment.ID, "comment")
+		if err != nil {
+			log.Printf("Ошибка при получении количества лайков для комментария %d: %v", comment.ID, err)
+			continue
+		}
+		commentDislikes, err := CountDislikes(db, comment.ID, "comment")
+		if err != nil {
+			log.Printf("Ошибка при получении количества дизлайков для комментария %d: %v", comment.ID, err)
+			continue
+		}
+
+		// Store the counts in the map using the comment ID as the key
+		commentCounts[comment.ID] = models.LikeDislikeCount{
+			Likes:    commentLikes,
+			Dislikes: commentDislikes,
+		}
+	}
+
+	postLikes, err := CountLikes(db, postID, "post")
+	if err != nil {
+		log.Printf("Ошибка при получении количества лайков для поста: %v", err)
+	}
+	postDislikes, err := CountDislikes(db, postID, "post")
+	if err != nil {
+		log.Printf("Ошибка при получении количества дизлайков для поста: %v", err)
+	}
+
+	// Fetch categories from the database
+	rowsCategory, err := db.Query("SELECT id, name FROM categories")
+	if err != nil {
+		log.Printf("Ошибка загрузки категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+	defer rowsCategory.Close()
+
+	var categories []models.Category
+	for rowsCategory.Next() {
+		var category models.Category
+		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+			log.Printf("Ошибка при чтении категории: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, category)
+	}
+
+	if err := rowsCategory.Err(); err != nil {
+		log.Printf("Ошибка при обработке категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+
 	// Создаем структуру для передачи в шаблон
 	pageData := models.PostPageData{
-		Post:     post,
-		User:     user, // может быть nil, если пользователь не залогинен
-		Comments: comments,
+		Post:          post,
+		User:          user, // может быть nil, если пользователь не залогинен
+		Comments:      comments,
+		PostLikes:     postLikes,
+		PostDislikes:  postDislikes,
+		CommentCounts: commentCounts,
+		Categories:    categories,
 	}
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/post.html")
@@ -109,105 +172,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 }
-
-// func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-// 	if r.Method != http.MethodGet {
-// 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	// Получаем параметр category_id из запроса, если он существует
-// 	categoryIDStr := r.URL.Query().Get("category_id")
-// 	categoryID, errCategory := strconv.Atoi(categoryIDStr)
-// 	if errCategory != nil {
-// 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// userIDStr := r.URL.Query().Get("user_id")
-// 	// userID, err := strconv.Atoi(userIDStr)
-// 	// if err != nil {
-// 	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-// 	// 	return
-// 	// }
-
-// 	var rows *sql.Rows
-// 	var err error
-
-// 	if categoryIDStr != "" {
-// 		// Получение постов для указанной категории
-// 		rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts WHERE category_id = ? ORDER BY created_at DESC", categoryID)
-// 	} else {
-// 		// Получение всех постов, если категория не указана
-// 		rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts ORDER BY created_at DESC")
-// 	}
-
-// 	if err != nil {
-// 		log.Printf("Ошибка при получении постов: %v", err)
-// 		http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	defer rows.Close()
-
-// 	const limit = 200
-
-// 	var posts []models.Post
-// 	for rows.Next() {
-// 		var post models.Post
-// 		if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Body, &post.CategoryID, &post.CreatedAt); err != nil {
-// 			log.Printf("Ошибка при чтении поста: %v", err)
-// 			http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
-// 			return
-// 		}
-// 		// Обрезаем содержимое поста
-// 		post.Body = truncate(post.Body, limit)
-// 		posts = append(posts, post)
-// 	}
-
-// 	if err := rows.Err(); err != nil {
-// 		log.Printf("Ошибка при обработке результата: %v", err)
-// 		http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Проверка на наличие сессии пользователя
-// 	var user *models.User
-// 	cookie, err := r.Cookie("session_token")
-// 	if err == nil {
-// 		var userID int
-// 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
-// 		if err == nil {
-// 			user = &models.User{}
-// 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
-// 			if err != nil {
-// 				log.Printf("Ошибка при получении пользователя: %v", err)
-// 			}
-// 		}
-// 	}
-
-// 	// Создаем структуру для передачи в шаблон
-// 	pageData := models.PostsPageData{
-// 		Posts: posts,
-// 		User:  user,
-// 	}
-
-// 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/all_posts.html")
-// 	if err != nil {
-// 		log.Printf("Ошибка загрузки шаблона: %v", err)
-// 		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "text/html")
-
-// 	err = tmpl.ExecuteTemplate(w, "all_posts", pageData)
-// 	if err != nil {
-// 		log.Printf("Ошибка рендеринга: %v", err)
-// 		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
-// 		return
-// 	}
-// }
 
 func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
@@ -313,10 +277,37 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 	}
 
+	// Fetch categories from the database
+	rowsCategory, err := db.Query("SELECT id, name FROM categories")
+	if err != nil {
+		log.Printf("Ошибка загрузки категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+	defer rowsCategory.Close()
+
+	var categories []models.Category
+	for rowsCategory.Next() {
+		var category models.Category
+		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+			log.Printf("Ошибка при чтении категории: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, category)
+	}
+
+	if err := rowsCategory.Err(); err != nil {
+		log.Printf("Ошибка при обработке категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+
 	// Создаем структуру для передачи в шаблон
 	pageData := models.PostsPageData{
-		Posts: posts,
-		User:  user,
+		Posts:      posts,
+		User:       user,
+		Categories: categories,
 	}
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/all_posts.html")
@@ -344,31 +335,127 @@ func truncate(text string, limit int) string {
 	return text
 }
 
-// import (
-// 	//"literary-lions-forum/internal/models"
-// 	//"literary-lions-forum/internal/utils"
-// 	"literary-lions/internal/handlers"
-// 	"net/http"
-// )
+func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	if r.Method == http.MethodGet {
+		// Проверка на наличие сессии пользователя
+		var user *models.User
+		cookie, err := r.Cookie("session_token")
+		if err == nil {
+			var userID int
+			err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
+			if err == nil {
+				user = &models.User{}
+				err = db.QueryRow("SELECT id, username, email, COALESCE(bio, ''), COALESCE(profile_image, '') FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username, &user.Email, &user.Bio, &user.ProfImage)
+				if err != nil {
+					log.Printf("Ошибка при получении пользователя: %v", err)
+				}
+			}
+		} else {
+			http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+			return
+		}
 
-// func CreatePost(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method == http.MethodPost {
-// 		userID := handlers.GetUserIDFromSession(r) // Получение ID пользователя из сессии
-// 		title := r.FormValue("title")
-// 		content := r.FormValue("content")
-// 		category := r.FormValue("category")
+		// Fetch categories from the database
+		rows, err := db.Query("SELECT id, name FROM categories")
+		if err != nil {
+			log.Printf("Ошибка загрузки категорий: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
 
-// 		if title == "" || content == "" {
-// 			http.Error(w, "Empty post or content", http.StatusBadRequest)
-// 			return
-// 		}
+		var categories []models.Category
+		for rows.Next() {
+			var category models.Category
+			if err := rows.Scan(&category.ID, &category.Name); err != nil {
+				log.Printf("Ошибка при чтении категории: %v", err)
+				http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+				return
+			}
+			categories = append(categories, category)
+		}
 
-// 		err := models.CreatePost(userID, title, content, category)
-// 		if err != nil {
-// 			http.Error(w, "Error creating post", http.StatusInternalServerError)
-// 			return
-// 		}
+		if err := rows.Err(); err != nil {
+			log.Printf("Ошибка при обработке категорий: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
 
-// 		http.Redirect(w, r, "/", http.StatusSeeOther)
-// 	}
-// }
+		// Создаем структуру для передачи в шаблон
+		pageData := models.NewPostPageData{
+			User:       user,
+			Categories: categories,
+		}
+
+		tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/new_post.html")
+		if err != nil {
+			log.Printf("Ошибка загрузки шаблона: %v", err)
+			http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html")
+
+		err = tmpl.ExecuteTemplate(w, "new_post", pageData)
+		if err != nil {
+			log.Printf("Ошибка рендеринга: %v", err)
+			http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		// Check if the user is logged in
+		cookie, err := r.Cookie("session_token")
+		if err != nil {
+			http.Error(w, "Требуется авторизация", http.StatusUnauthorized)
+			return
+		}
+
+		var userID int
+		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
+		if err != nil {
+			http.Error(w, "Ошибка при проверке сессии", http.StatusUnauthorized)
+			return
+		}
+
+		// Parse form data
+		err = r.ParseForm()
+		if err != nil {
+			http.Error(w, "Ошибка обработки формы", http.StatusBadRequest)
+			return
+		}
+
+		title := r.FormValue("title")
+		body := r.FormValue("body")
+		categoryIDStr := r.FormValue("category_id")
+
+		if title == "" || body == "" {
+			http.Error(w, "Все поля должны быть заполнены", http.StatusBadRequest)
+			return
+		}
+
+		categoryID, err := strconv.Atoi(categoryIDStr)
+		if err != nil {
+			http.Error(w, "Неверный ID категории", http.StatusBadRequest)
+			return
+		}
+
+		result, err := db.Exec("INSERT INTO posts (user_id, title, body, category_id, created_at) VALUES (?, ?, ?, ?, ?)", userID, title, body, categoryID, time.Now())
+		if err != nil {
+			log.Printf("Ошибка при создании поста: %v", err)
+			http.Error(w, "Ошибка при создании поста", http.StatusInternalServerError)
+			return
+		}
+
+		postID, err := result.LastInsertId()
+		if err != nil {
+			http.Error(w, "Ошибка получения ID поста", http.StatusInternalServerError)
+			return
+		}
+
+		// Redirect to the new post page
+		http.Redirect(w, r, fmt.Sprintf("/post/%d", postID), http.StatusSeeOther)
+	}
+}
