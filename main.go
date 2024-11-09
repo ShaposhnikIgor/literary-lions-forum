@@ -97,6 +97,10 @@ func main() {
 		handlers.LikeDislikeHandler(w, r, db)
 	})
 
+	http.HandleFunc("/comment_like/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CommentLikeHandler(w, r, db) // Call your handler function here
+	})
+
 	//log.Fatal(http.ListenAndServe(":8080", nil))
 	http.ListenAndServe(":8080", nil)
 }

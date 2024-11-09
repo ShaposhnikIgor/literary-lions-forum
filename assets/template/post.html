@@ -11,8 +11,8 @@
     {{template "header" .}}
     <div class="container">
         <h1>{{.Post.Title}}</h1>
-        <p><strong>Категория:</strong> {{.Post.CategoryID}}</p>
-        <p><strong>Автор:</strong> {{.Post.UserID}}</p>
+        <p><strong>Категория:</strong> {{.Category}}</p>
+        <p><strong>Автор:</strong> {{.Author}}</p>
         <p>{{.Post.Body}}</p>
         <p><small>Опубликовано: {{.Post.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
         <a href="/all_posts">Вернуться ко всем постам</a>
@@ -20,50 +20,62 @@
         <!-- Display like/dislike counts for the post -->
         <p>👍 {{.PostLikes}} | 👎 {{.PostDislikes}}</p>
 
-         <!-- Like/Dislike buttons for the post -->
-         <form action="/like_dislike" method="POST" style="display: inline;">
+        {{if .User}}
+        <!-- Like/Dislike buttons for the post -->
+        <form action="/post/{{.Post.ID}}" method="POST" style="display: inline;">
             <input type="hidden" name="target_id" value="{{.Post.ID}}">
             <input type="hidden" name="target_type" value="post">
             <input type="hidden" name="is_like" value="true">
             <button type="submit">👍 Нравится</button>
         </form>
-        <form action="/like_dislike" method="POST" style="display: inline;">
+        <form action="/post/{{.Post.ID}}" method="POST" style="display: inline;">
             <input type="hidden" name="target_id" value="{{.Post.ID}}">
             <input type="hidden" name="target_type" value="post">
             <input type="hidden" name="is_like" value="false">
             <button type="submit">👎 Не нравится</button>
         </form>
+        {{end}}
     </div>
 
-    <h3>Добавить комментарий</h3>
-<form action="/comment" method="POST">
-    <input type="hidden" name="post_id" value="{{.Post.ID}}">
-    <textarea name="body" required></textarea>
-    <button type="submit">Отправить</button>
-</form>
+<h3>Добавить комментарий</h3>
+    {{if .User}}
+        <!-- Comment form for logged-in users -->
+        <form action="/comment" method="POST">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <textarea name="body" required></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+    {{else}}
+        <!-- Message for guests -->
+        <p>Пожалуйста, <a href="/login">войдите</a> или <a href="/register">зарегистрируйтесь</a>, чтобы оставить комментарий.</p>
+    {{end}}
 
 <h3>Комментарии</h3>
 {{range .Comments}}
     <div class="comment">
-        <p><strong>{{.UserID}}</strong>: {{.Body}}</p>
+        <p><strong>{{.Username}}</strong>: {{.Body}}</p>
         <p><small>Создано: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
         <!-- Display like/dislike counts for the comment -->
         <p>👍 Likes: {{ (index $.CommentCounts .ID).Likes }}</p>
         <p>👎 Dislikes: {{ (index $.CommentCounts .ID).Dislikes }}</p>
 
+        {{if $.User}}
         <!-- Like/Dislike buttons for each comment -->
-        <form action="/like_dislike" method="POST" style="display: inline;">
+        <form action="/comment_like/{{.ID}}" method="POST" style="display: inline;">
+            <input type="hidden" name="post_id" value="{{$.Post.ID}}">
             <input type="hidden" name="target_id" value="{{.ID}}">
             <input type="hidden" name="target_type" value="comment">
             <input type="hidden" name="is_like" value="true">
             <button type="submit">👍 Нравится</button>
         </form>
-        <form action="/like_dislike" method="POST" style="display: inline;">
+        <form action="/comment_like/{{.ID}}" method="POST" style="display: inline;">
+            <input type="hidden" name="post_id" value="{{$.Post.ID}}">
             <input type="hidden" name="target_id" value="{{.ID}}">
             <input type="hidden" name="target_type" value="comment">
             <input type="hidden" name="is_like" value="false">
             <button type="submit">👎 Не нравится</button>
         </form>
+        {{end}}
     </div>
 {{else}}
     <p>Нет комментариев.</p>

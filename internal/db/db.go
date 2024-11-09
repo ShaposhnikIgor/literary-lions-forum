@@ -70,15 +70,16 @@ func createTables(db *sql.DB) error {
     );`
 
 	createLikesTable := `
-    CREATE TABLE IF NOT EXISTS likes_dislikes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        target_id INTEGER,
-        target_type TEXT,  -- 'post' or 'comment'
-        is_like BOOLEAN,   -- TRUE for like, FALSE for dislike
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    );`
+	CREATE TABLE IF NOT EXISTS likes_dislikes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER,
+		target_id INTEGER,
+		target_type TEXT,  -- 'post' or 'comment'
+		is_like BOOLEAN,   -- TRUE for like, FALSE for dislike
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		UNIQUE (user_id, target_id, target_type)
+	);`
 
 	createSessionsTable := `
     CREATE TABLE IF NOT EXISTS sessions (

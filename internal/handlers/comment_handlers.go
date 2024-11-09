@@ -59,83 +59,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	http.Redirect(w, r, fmt.Sprintf("/post/%d", postID), http.StatusSeeOther)
 }
 
-// func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-// 	if r.Method != http.MethodGet {
-// 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	// Check user session
-// 	cookie, err := r.Cookie("session_token")
-// 	if err != nil {
-// 		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	var userID int
-// 	err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
-// 	if err != nil {
-// 		http.Error(w, "Ошибка аутентификации", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	// Fetch user's comments
-// 	rows, err := db.Query(`
-// 		SELECT c.id, c.post_id, c.user_id, c.body, c.created_at, p.title
-// 		FROM comments c
-// 		JOIN posts p ON c.post_id = p.id
-// 		WHERE c.user_id = ?
-// 		ORDER BY c.created_at DESC`, userID)
-// 	if err != nil {
-// 		log.Printf("Ошибка при извлечении комментариев: %v", err)
-// 		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	defer rows.Close()
-
-// 	var comments []models.Comment
-// 	for rows.Next() {
-// 		var comment models.Comment
-// 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Body, &comment.CreatedAt); err != nil {
-// 			log.Printf("Ошибка при чтении комментария: %v", err)
-// 			http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
-// 			return
-// 		}
-// 		comments = append(comments, comment)
-// 	}
-
-// 	// Check for any errors during row iteration
-// 	if err := rows.Err(); err != nil {
-// 		log.Printf("Ошибка при обработке результатов комментариев: %v", err)
-// 		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Prepare data for template
-// 	pageData := struct {
-// 		User     *models.User
-// 		Comments []models.Comment
-// 	}{
-// 		User:     &models.User{ID: userID},
-// 		Comments: comments,
-// 	}
-
-// 	// Render template
-// 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user_comments.html")
-// 	if err != nil {
-// 		log.Printf("Ошибка загрузки шаблона: %v", err)
-// 		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "text/html")
-// 	if err := tmpl.ExecuteTemplate(w, "user_comments", pageData); err != nil {
-// 		log.Printf("Ошибка рендеринга: %v", err)
-// 		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
-// 		return
-// 	}
-// }
-
 func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
@@ -144,18 +67,6 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// // Проверка на наличие сессии пользователя
 	var userID int
-	// cookie, err := r.Cookie("session_token")
-	// if err == nil {
-	// 	err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
-	// 	if err != nil {
-	// 		http.Error(w, "Ошибка аутентификации", http.StatusUnauthorized)
-	// 		return
-	// 	}
-	// } else {
-	// 	http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
-	// 	return
-	// }
-
 	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")

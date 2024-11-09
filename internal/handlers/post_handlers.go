@@ -12,13 +12,192 @@ import (
 	"time"
 )
 
+// func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+// 	if r.Method != http.MethodGet {
+// 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+// 		return
+// 	}
+
+// 	// Извлечение postid из пути
+// 	pathParts := strings.Split(r.URL.Path, "/")
+// 	if len(pathParts) < 3 || pathParts[1] != "post" {
+// 		http.Error(w, "Страница не найдена", http.StatusNotFound)
+// 		return
+// 	}
+
+// 	postID, err := strconv.Atoi(pathParts[2])
+// 	if err != nil {
+// 		http.Error(w, "Неверный ID поста", http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	var author string
+// 	var categoryName string
+// 	// Modified query to join with users and categories tables
+// 	var post models.Post
+// 	query := `
+// 		SELECT p.id, p.user_id, u.username, p.title, p.body, p.category_id, c.name AS category_name, p.created_at
+// 		FROM posts p
+// 		JOIN users u ON p.user_id = u.id
+// 		JOIN categories c ON p.category_id = c.id
+// 		WHERE p.id = ?`
+// 	err = db.QueryRow(query, postID).Scan(
+// 		&post.ID, &post.UserID, &author, &post.Title, &post.Body,
+// 		&post.CategoryID, &categoryName, &post.CreatedAt,
+// 	)
+// 	if err != nil {
+// 		if err == sql.ErrNoRows {
+// 			http.Error(w, "Пост не найден", http.StatusNotFound)
+// 		} else {
+// 			log.Printf("Ошибка при извлечении поста: %v", err)
+// 			http.Error(w, "Ошибка при загрузке поста", http.StatusInternalServerError)
+// 		}
+// 		return
+// 	}
+
+// 	// Проверка на наличие сессии пользователя
+// 	var user *models.User
+// 	cookie, err := r.Cookie("session_token")
+// 	if err == nil {
+// 		var userID int
+// 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
+// 		if err == nil {
+// 			user = &models.User{}
+// 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
+// 			if err != nil {
+// 				log.Printf("Ошибка при получении пользователя: %v", err)
+// 			}
+// 		}
+// 	}
+
+// 	// Fetch comments for the post along with usernames
+// 	var comments []models.Comment
+// 	commentQuery := `
+// 	SELECT c.id, c.post_id, c.user_id, u.username, c.body, c.created_at
+// 	FROM comments c
+// 	JOIN users u ON c.user_id = u.id
+// 	WHERE c.post_id = ?
+// 	ORDER BY c.created_at DESC
+// `
+// 	rows, err := db.Query(commentQuery, postID)
+// 	if err != nil {
+// 		log.Printf("Ошибка при извлечении комментариев: %v", err)
+// 		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		var comment models.Comment
+// 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Username, &comment.Body, &comment.CreatedAt); err != nil {
+// 			log.Printf("Ошибка при чтении комментария: %v", err)
+// 			http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+// 			return
+// 		}
+// 		comments = append(comments, comment)
+// 	}
+
+// 	if err := rows.Err(); err != nil {
+// 		log.Printf("Ошибка при обработке результатов комментариев: %v", err)
+// 		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	commentCounts := make(map[int]models.LikeDislikeCount)
+
+// 	for _, comment := range comments {
+// 		// Fetch the like and dislike counts for each comment
+// 		commentLikes, err := CountLikes(db, comment.ID, "comment")
+// 		if err != nil {
+// 			log.Printf("Ошибка при получении количества лайков для комментария %d: %v", comment.ID, err)
+// 			continue
+// 		}
+// 		commentDislikes, err := CountDislikes(db, comment.ID, "comment")
+// 		if err != nil {
+// 			log.Printf("Ошибка при получении количества дизлайков для комментария %d: %v", comment.ID, err)
+// 			continue
+// 		}
+
+// 		// Store the counts in the map using the comment ID as the key
+// 		commentCounts[comment.ID] = models.LikeDislikeCount{
+// 			Likes:    commentLikes,
+// 			Dislikes: commentDislikes,
+// 		}
+// 	}
+
+// 	postLikes, err := CountLikes(db, postID, "post")
+// 	if err != nil {
+// 		log.Printf("Ошибка при получении количества лайков для поста: %v", err)
+// 	}
+// 	postDislikes, err := CountDislikes(db, postID, "post")
+// 	if err != nil {
+// 		log.Printf("Ошибка при получении количества дизлайков для поста: %v", err)
+// 	}
+
+// 	// Fetch categories from the database
+// 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
+// 	if err != nil {
+// 		log.Printf("Ошибка загрузки категорий: %v", err)
+// 		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	defer rowsCategory.Close()
+
+// 	var categories []models.Category
+// 	for rowsCategory.Next() {
+// 		var category models.Category
+// 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+// 			log.Printf("Ошибка при чтении категории: %v", err)
+// 			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+// 			return
+// 		}
+// 		categories = append(categories, category)
+// 	}
+
+// 	if err := rowsCategory.Err(); err != nil {
+// 		log.Printf("Ошибка при обработке категорий: %v", err)
+// 		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Создаем структуру для передачи в шаблон
+// 	pageData := models.PostPageData{
+// 		Post:          post,
+// 		User:          user, // может быть nil, если пользователь не залогинен
+// 		Comments:      comments,
+// 		PostLikes:     postLikes,
+// 		PostDislikes:  postDislikes,
+// 		CommentCounts: commentCounts,
+// 		Categories:    categories,
+// 		Author:        author,
+// 		Category:      categoryName,
+// 	}
+
+// 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/post.html")
+// 	if err != nil {
+// 		log.Printf("Ошибка загрузки шаблона: %v", err)
+// 		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Set the content type
+// 	w.Header().Set("Content-Type", "text/html")
+
+// 	err = tmpl.ExecuteTemplate(w, "post", pageData) // specify "post" here
+// 	if err != nil {
+// 		log.Printf("Ошибка рендеринга: %v", err)
+// 		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+// 		return
+// 	}
+// }
+
 func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "Метод не поддерживается aaaaaaaaaa", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Извлечение postid из пути
+	// Extract post ID from the URL path
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) < 3 || pathParts[1] != "post" {
 		http.Error(w, "Страница не найдена", http.StatusNotFound)
@@ -31,10 +210,20 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Извлечение данных поста из базы данных
+	var author string
+	var categoryName string
+	// Modified query to join with users and categories tables
 	var post models.Post
-	query := "SELECT id, user_id, title, body, category_id, created_at FROM posts WHERE id = ?"
-	err = db.QueryRow(query, postID).Scan(&post.ID, &post.UserID, &post.Title, &post.Body, &post.CategoryID, &post.CreatedAt)
+	query := `
+		SELECT p.id, p.user_id, u.username, p.title, p.body, p.category_id, c.name AS category_name, p.created_at
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		JOIN categories c ON p.category_id = c.id
+		WHERE p.id = ?`
+	err = db.QueryRow(query, postID).Scan(
+		&post.ID, &post.UserID, &author, &post.Title, &post.Body,
+		&post.CategoryID, &categoryName, &post.CreatedAt,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Пост не найден", http.StatusNotFound)
@@ -45,7 +234,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
+	// Check if user is logged in (session)
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -60,9 +249,53 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 	}
 
-	// Fetch comments for the post
+	// Handling like/dislike for the post
+	if r.Method == http.MethodPost {
+		//targetID := r.FormValue("target_id")
+		targetType := r.FormValue("target_type")
+		isLike := r.FormValue("is_like") == "true"
+
+		// Validate and process like/dislike for post
+		if targetType == "post" {
+			_, err = db.Exec(`
+			INSERT OR REPLACE INTO likes_dislikes (user_id, target_id, target_type, is_like, created_at)
+			VALUES (?, ?, ?, ?, ?)`,
+				user.ID, postID, "post", isLike, time.Now())
+			if err != nil {
+				log.Printf("Ошибка при добавлении/обновлении like/dislike для поста: %v", err)
+			}
+		}
+
+		// Handling like/dislike for comment (if any)
+		commentID := r.FormValue("comment_id")
+		if commentID != "" {
+			commentIDInt, _ := strconv.Atoi(commentID)
+			if targetType == "comment" {
+				_, err = db.Exec(`
+					INSERT INTO likes_dislikes (user_id, target_id, target_type, is_like, created_at)
+					VALUES (?, ?, ?, ?, ?)
+					ON DUPLICATE KEY UPDATE is_like = ?, created_at = ?`,
+					user.ID, commentIDInt, "comment", isLike, time.Now(), isLike, time.Now())
+				if err != nil {
+					log.Printf("Ошибка при добавлении/обновлении like/dislike для комментария: %v", err)
+				}
+			}
+		}
+
+		// Redirect back to the same post page to reload and show updated counts
+		http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
+		return
+	}
+
+	// Fetch comments for the post along with usernames
 	var comments []models.Comment
-	commentQuery := "SELECT id, post_id, user_id, body, created_at FROM comments WHERE post_id = ? ORDER BY created_at DESC"
+	commentQuery := `
+	SELECT c.id, c.post_id, c.user_id, u.username, c.body, c.created_at
+	FROM comments c
+	JOIN users u ON c.user_id = u.id
+	WHERE c.post_id = ?
+	ORDER BY c.created_at DESC
+	`
 	rows, err := db.Query(commentQuery, postID)
 	if err != nil {
 		log.Printf("Ошибка при извлечении комментариев: %v", err)
@@ -73,24 +306,27 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	for rows.Next() {
 		var comment models.Comment
-		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Body, &comment.CreatedAt); err != nil {
-			log.Printf("Ошибка при чтении комментария1: %v", err)
+		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Username, &comment.Body, &comment.CreatedAt); err != nil {
+			log.Printf("Ошибка при чтении комментария: %v", err)
 			http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
 			return
 		}
 		comments = append(comments, comment)
 	}
 
-	if err := rows.Err(); err != nil {
-		log.Printf("Ошибка при обработке результатов комментариев: %v", err)
-		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
-		return
+	// Fetch like/dislike counts for post and comments
+	postLikes, err := CountLikes(db, postID, "post")
+	if err != nil {
+		log.Printf("Ошибка при получении количества лайков для поста: %v", err)
+	}
+	postDislikes, err := CountDislikes(db, postID, "post")
+	if err != nil {
+		log.Printf("Ошибка при получении количества дизлайков для поста: %v", err)
 	}
 
+	// Get like/dislike counts for each comment
 	commentCounts := make(map[int]models.LikeDislikeCount)
-
 	for _, comment := range comments {
-		// Fetch the like and dislike counts for each comment
 		commentLikes, err := CountLikes(db, comment.ID, "comment")
 		if err != nil {
 			log.Printf("Ошибка при получении количества лайков для комментария %d: %v", comment.ID, err)
@@ -101,58 +337,22 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			log.Printf("Ошибка при получении количества дизлайков для комментария %d: %v", comment.ID, err)
 			continue
 		}
-
-		// Store the counts in the map using the comment ID as the key
 		commentCounts[comment.ID] = models.LikeDislikeCount{
 			Likes:    commentLikes,
 			Dislikes: commentDislikes,
 		}
 	}
 
-	postLikes, err := CountLikes(db, postID, "post")
-	if err != nil {
-		log.Printf("Ошибка при получении количества лайков для поста: %v", err)
-	}
-	postDislikes, err := CountDislikes(db, postID, "post")
-	if err != nil {
-		log.Printf("Ошибка при получении количества дизлайков для поста: %v", err)
-	}
-
-	// Fetch categories from the database
-	rowsCategory, err := db.Query("SELECT id, name FROM categories")
-	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
-		return
-	}
-	defer rowsCategory.Close()
-
-	var categories []models.Category
-	for rowsCategory.Next() {
-		var category models.Category
-		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
-			return
-		}
-		categories = append(categories, category)
-	}
-
-	if err := rowsCategory.Err(); err != nil {
-		log.Printf("Ошибка при обработке категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
-		return
-	}
-
-	// Создаем структуру для передачи в шаблон
+	// Render page with updated like/dislike counts
 	pageData := models.PostPageData{
 		Post:          post,
-		User:          user, // может быть nil, если пользователь не залогинен
+		User:          user,
 		Comments:      comments,
 		PostLikes:     postLikes,
 		PostDislikes:  postDislikes,
 		CommentCounts: commentCounts,
-		Categories:    categories,
+		Author:        author,
+		Category:      categoryName,
 	}
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/post.html")
@@ -162,10 +362,8 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Set the content type
 	w.Header().Set("Content-Type", "text/html")
-
-	err = tmpl.ExecuteTemplate(w, "post", pageData) // specify "post" here
+	err = tmpl.ExecuteTemplate(w, "post", pageData)
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
 		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)

@@ -44,6 +44,7 @@ type Comment struct {
 	Body      string    `db:"body"`
 	CreatedAt time.Time `db:"created_at"`
 	Title     string
+	Username  string
 }
 
 // LikeDislike - структура для представления лайков и дизлайков
@@ -76,6 +77,8 @@ type PostPageData struct {
 	PostDislikes  int
 	CommentCounts map[int]LikeDislikeCount
 	Categories    []Category
+	Author        string
+	Category      string
 }
 
 type LikeDislikeCount struct {
@@ -98,6 +101,7 @@ type RegisterPageData struct {
 	CaptchaQuestion string // Вопрос для отображения капчи
 	User            *User  // Данные пользователя, могут быть nil, если пользователь не залогинен
 	Categories      []Category
+	Error           string
 }
 
 type UserPageData struct {

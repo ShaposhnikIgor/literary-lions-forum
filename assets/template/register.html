@@ -36,6 +36,11 @@
         <input type="submit" value="Register">
     </form>
 
+    <!-- Блок для отображения ошибки -->
+    {{if .Error}}
+    <div class="error">{{.Error}}</div>
+    {{end}}
+
     <script>
         function togglePassword() {
             var passwordField = document.getElementById("password");
