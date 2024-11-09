@@ -1,24 +1,24 @@
 {{define "all_posts"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Все посты</title>
-    <link rel="stylesheet" href="/static/css/all_posts.css">
+    <title>All posts</title>
+    <link rel="stylesheet" href="/assets/static/all_posts.css">
 </head>
 <body>
     {{template "header" .}}
     <div class="container">
-        <h1>Все посты</h1>
+        <h1>All posts</h1>
         {{range .Posts}}
             <div class="post">
                 <h2><a href="/post/{{.ID}}">{{.Title}}</a></h2>
-                <p><small>Автор: {{.UserID}} | Опубликовано: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+                <p><small>Author: {{.UserID}} | Published: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
                 <p>{{.Body}}</p>
             </div>
         {{else}}
-            <p>Нет доступных постов.</p>
+            <p>No accessible posts.</p>
         {{end}}
     </div>
 </body>

@@ -1,28 +1,28 @@
 {{define "user_comments"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои комментарии</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>My comments</title>
+    <link rel="stylesheet" href="/assets/static/user_comments.css">
 </head>
 <body>
     {{template "header" .}}
 
     <div class="container">
-        <h1>Мои комментарии</h1>
+        <h1>My comments</h1>
         {{if .Comments}}
             {{range .Comments}}
                 <div class="comment">
                     <h3>Пост: {{.Title}}</h3>
                     <p>{{.Body}}</p>
-                    <p><small>Создано: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
-                    <a href="/post/{{.PostID}}">Перейти к посту</a>
+                    <p><small>Created: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+                    <a href="/post/{{.PostID}}">Go to the post</a>
                 </div>
             {{end}}
         {{else}}
-            <p>Нет комментариев.</p>
+            <p>No comments.</p>
         {{end}}
     </div>
 </body>

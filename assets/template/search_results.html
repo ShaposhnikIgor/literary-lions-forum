@@ -1,15 +1,16 @@
 {{define "search_results"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Все посты</title>
-    <link rel="stylesheet" href="/static/css/all_posts.css">
+    <link rel="stylesheet" href="/assets/static/all_posts.css">
+    <link rel="stylesheet" href="/assets/static/search_results.css">
 </head>
 <body>
     {{template "header" .}}
-    <h3>Результаты поиска для: "{{.Query}}"</h3>
+    <h3>Search results for: "{{.Query}}"</h3>
 {{if .Results}}
     <ul>
         {{range .Results}}
@@ -19,7 +20,7 @@
         {{end}}
     </ul>
 {{else}}
-    <p>Нет результатов по вашему запросу.</p>
+    <p>No results by query.</p>
 {{end}}
 </body>
 </html>

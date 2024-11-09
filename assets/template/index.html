@@ -4,26 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница - Literary Lions</title>
+    <title>Main page - Literary Lions</title>
+    <link rel="stylesheet" href="/assets/static/index.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>    
-    {{template "header" .}}
 
-    <h1>Добро пожаловать в Literary Lions!</h1>
-    <h2>Последние посты:</h2>
-    <hr>
+    <!-- Navbar at the top as header -->
+    <nav class="navbar">
+        <div class="left-links">
+            <a href="/all_posts">All Posts</a>
+            <a href="/categories">Categories</a>
+            <a href="/search">Search</a>
+        </div>
+        <div class="right-links">
+            {{if .User}}
+                <a href="/user">{{.User.Username}}</a> | <a href="/logout">Logout</a>
+            {{else}}
+                <a href="/login">Login</a> | <a href="/register">Register</a>
+            {{end}}
+        </div>
+    </nav>
 
-    <ul>
-        {{range .Posts}}
-            <li><a href="/post/{{.ID}}">{{.Title}}</a></li>
-        {{end}}
-    </ul>
+    <div class="container">
+        <h1>Welcome to Literary Lions!</h1>
+        <h2>The latest posts:</h2>
+        <hr>
+        <ul>
+            {{range .Posts}}
+                <li><a href="/post/{{.ID}}">{{.Title}}</a></li>
+            {{end}}
+        </ul>
+    </div>
 
-    {{if .User}}
-        <a href="/user">{{.User.Username}}</a> | <a href="/logout">Выход</a>
-    {{else}}
-        <a href="/login">Войти</a> | <a href="/register">Регистрация</a>
-    {{end}}
+    <footer>
+        <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+    </footer>
 
 </body>
 </html>

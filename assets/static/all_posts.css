@@ -1,0 +1,88 @@
+/* Global styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f0e6; /* Warm off-white background */
+    color: #4e392f; /* Dark brown text color */
+    line-height: 1.6;
+}
+
+h1, h2 {
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+}
+
+h1 {
+    color: #5a3e2b; /* Deep brown for headings */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #3e2a1f; /* Slightly darker brown for post titles */
+}
+
+a {
+    color: #8b5c42; /* Soft brown color for links */
+    text-decoration: none;
+}
+
+a:hover {
+    color: #5a3e2b; /* Darker brown when hovering */
+    text-decoration: underline;
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 248, 240, 0.9); /* Light semi-transparent background */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #ffffff; /* White background for each post */
+    border-left: 5px solid #8b5c42; /* Decorative left border in brown */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post h2 {
+    font-size: 1.6rem;
+    color: #3e2a1f; /* Dark brown for titles */
+    margin-bottom: 10px;
+}
+
+.post p {
+    font-size: 1.1rem;
+    color: #5a3e2b;
+    margin-bottom: 10px;
+}
+
+.post small {
+    font-size: 0.9rem;
+    color: #a98f7d; /* Lighter brown for author/date */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .post {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+}

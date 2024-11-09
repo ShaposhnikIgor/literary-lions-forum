@@ -1,90 +1,90 @@
 {{define "user"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профиль пользователя</title>
-    <link rel="stylesheet" href="/static/css/user_profile.css">
+    <title>User's profile</title>
+    <link rel="stylesheet" href="/assets/static/user.css">
 </head>
 <body>
     {{template "header" .}}
     <div class="container">
-        <h1>Профиль пользователя: {{.User.Username}}</h1>
+        <h1>User's profile: {{.User.Username}}</h1>
         <p>Email: {{.User.Email}}</p>
 
         <!-- Изображение профиля -->
         <section>
-            <h2>Изображение профиля</h2>
-            <img src="/{{.User.ProfImage}}" alt="Изображение профиля" class="profile-image">
+            <h2>Profile's picture</h2>
+            <img src="/{{.User.ProfImage}}" alt="Profile's picture" class="profile-image">
         </section>
 
         <!-- Мои комментарии -->
         <section>
-            <h2>Мои posts</h2>
-            <a href="/all_posts?user_id={{.User.ID}}" class="btn">Посмотреть мои posts</a>
+            <h2>Мy posts</h2>
+            <a href="/all_posts?user_id={{.User.ID}}" class="btn">Review my posts</a>
         </section>
 
         <!-- Мои комментарии -->
         <section>
-            <h2>Мои комментарии</h2>
-            <a href="/user/comments?user_id={{.User.ID}}" class="btn">Посмотреть мои комментарии</a>
+            <h2>My comments</h2>
+            <a href="/user/comments?user_id={{.User.ID}}" class="btn">Review my comments</a>
         </section>
 
         <!-- Мои лайки -->
         <section>
-            <h2>Мои лайки</h2>
-            <a href="/user/likes?user_id={{.User.ID}}" class="btn">Посмотреть мои лайки</a>
+            <h2>My likes</h2>
+            <a href="/user/likes?user_id={{.User.ID}}" class="btn">Review my likes</a>
         </section>
 
         <!-- Изменение имени пользователя -->
         <section>
-            <h2>Изменить имя пользователя</h2>
+            <h2>Change user's name</h2>
             <form action="/user/change_username" method="POST">
-                <label for="username">Новое имя пользователя:</label>
+                <label for="username">New user's name:</label>
                 <input type="text" id="username" name="username" value="{{.User.Username}}" required>
-                <button type="submit" class="btn">Изменить имя</button>
+                <button type="submit" class="btn">Change the name</button>
             </form>
         </section>
 
         <!-- Изменение пароля -->
         <section>
-            <h2>Изменить пароль</h2>
+            <h2>Change password</h2>
             <form action="/user/change_password" method="POST">
-                <label for="current_password">Текущий пароль:</label>
+                <label for="current_password">Current password:</label>
                 <input type="password" id="current_password" name="current_password" required>
 
-                <label for="new_password">Новый пароль:</label>
+                <label for="new_password">New password:</label>
                 <input type="password" id="new_password" name="new_password" required>
 
-                <label for="confirm_password">Подтвердите новый пароль:</label>
+                <label for="confirm_password">Re-enter new password:</label>
                 <input type="password" id="confirm_password" name="confirm_password" required>
 
-                <button type="submit" class="btn">Изменить пароль</button>
+                <button type="submit" class="btn">Change password</button>
             </form>
         </section>
 
         <!-- Загрузка картинки -->
         <section>
-            <h2>Загрузить картинку профиля</h2>
+            <h2>Upload profile's picture</h2>
             <form action="/user/upload_image" method="POST" enctype="multipart/form-data">
-                <label for="profile_image">Выберите файл:</label>
+                <label for="profile_image">Choose the file:</label>
                 <input type="file" id="profile_image" name="profile_image" accept="image/*" required>
-                <button type="submit" class="btn">Загрузить картинку</button>
+                <button type="submit" class="btn">Upload the picture</button>
             </form>
         </section>
 
         <!-- Добавить информацию о себе -->
         <section>
-            <h2>Добавить информацию о себе</h2>
+            <h2>Add personal information</h2>
             <form action="/user/add_bio" method="POST">
-                <label for="bio">Информация о себе:</label>
-                <textarea id="bio" name="bio" rows="5" placeholder="Напишите немного о себе...">{{.User.Bio}}</textarea>
-                <button type="submit" class="btn">Сохранить информацию</button>
+                <label for="bio">Personal information:</label>
+                <textarea id="bio" name="bio" rows="5" placeholder="Write something about yourself, hobbies, interests...">{{.User.Bio}}</textarea>
+                <button type="submit" class="btn">Save the data</button>
             </form>
         </section>
     </div>
-    <a href="/logout">Выйти</a>
+    <a href="/logout">Logout</a>
 </body>
 </html>
 {{end}}

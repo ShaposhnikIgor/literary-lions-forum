@@ -12,54 +12,39 @@ body {
     font-size: 16px;
     line-height: 1.6;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     height: 100vh;
+    justify-content: flex-start;
     padding: 20px;
 }
 
-h2 {
+h1 {
     text-align: center;
     color: #7a4c3c; /* Warm brown */
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    font-size: 2rem;
 }
 
-/* Login container */
-.login-container {
+/* Form container */
+form {
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     margin-top: 20px;
-}
-
-/* Error message */
-.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-/* Form styling */
-form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
-label {
-    font-weight: bold;
-    color: #7a4c3c; /* Warm brown */
-}
-
+/* Input fields and textarea */
 input[type="text"],
-input[type="password"] {
-    padding: 10px;
+textarea,
+select {
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
@@ -67,12 +52,14 @@ input[type="password"] {
 }
 
 input[type="text"]:focus,
-input[type="password"]:focus {
+textarea:focus,
+select:focus {
     border-color: #7a4c3c; /* Focus effect */
     outline: none;
 }
 
-input[type="submit"] {
+/* Submit button */
+button {
     background-color: #7a4c3c; /* Warm brown */
     color: white;
     padding: 12px;
@@ -81,29 +68,47 @@ input[type="submit"] {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
+    align-self: center;
 }
 
-input[type="submit"]:hover {
+button:hover {
     background-color: #5e3523; /* Darker brown on hover */
 }
 
-input[type="submit"]:active {
+button:active {
     background-color: #48211a; /* Even darker on active click */
+}
+
+/* Label styling */
+label {
+    font-weight: bold;
+    color: #7a4c3c; /* Warm brown */
+}
+
+/* Textarea specific styling */
+textarea {
+    min-height: 150px;
+    resize: vertical;
 }
 
 /* Responsive styles */
 @media (max-width: 600px) {
-    .login-container {
+    form {
         padding: 20px;
     }
 
     input[type="text"],
-    input[type="password"] {
+    textarea,
+    select {
         font-size: 14px;
     }
 
-    input[type="submit"] {
+    button {
         font-size: 14px;
         padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
     }
 }

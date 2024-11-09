@@ -1,29 +1,30 @@
 {{define "new_post"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать пост</title>
+    <title>Create a post</title>
+    <link rel="stylesheet" href="/assets/static/new_post.css">
 </head>
 <body>
     {{template "header" .}}
-    <h1>Создать новый пост</h1>
+    <h1>Create new post</h1>
     <form action="/new-post" method="POST">
-        <label for="title">Заголовок:</label>
+        <label for="title">The header:</label>
         <input type="text" name="title" id="title" required>
         <br>
-        <label for="body">Текст:</label>
+        <label for="body">Text:</label>
         <textarea name="body" id="body" required></textarea>
         <br>
-        <label for="category_id">Категория:</label>
+        <label for="category_id">Categories:</label>
         <select name="category_id" id="category_id" required>
             {{range .Categories}}
                 <option value="{{.ID}}">{{.Name}}</option>
             {{end}}
         </select>
         <br>
-        <button type="submit">Опубликовать</button>
+        <button type="submit">Publish</button>
     </form>
 </body>
 </html>

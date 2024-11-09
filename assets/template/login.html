@@ -1,17 +1,17 @@
 {{define "login"}}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход на сайт</title>
-    <link rel="stylesheet" href="/assets/css/login.css">
+    <title>Login to the site</title>
+    <link rel="stylesheet" href="/assets/static/login.css">
 </head>
 <body>
     {{template "header" .}}
 
 <div class="login-container">
-    <h2>Вход на сайт</h2>
+    <h2>Login</h2>
 
     <!-- Блок для отображения ошибки -->
     {{if .Error}}
@@ -19,13 +19,13 @@
     {{end}}
 
     <form action="/login" method="POST">
-        <label for="username">Имя пользователя:</label>
-        <input type="text" id="username or email" name="username or email" placeholder="Введите имя пользователя" required>
+        <label for="username">User name:</label>
+        <input type="text" id="username or email" name="username or email" placeholder="Enter user name" required>
 
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
 
-        <input type="submit" value="Войти">
+        <input type="submit" value="Login">
     </form>
 </div>
 

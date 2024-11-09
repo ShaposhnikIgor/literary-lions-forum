@@ -1,73 +1,170 @@
-/* Общие стили для всего документа */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+/* General reset and base styles */
+* {
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
 }
 
-/* Контейнер для основного содержимого */
-.container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 800px;
-    margin: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Заголовки */
-h1, h2 {
+/* Body styling */
+body {
+    background-color: #f4f4f4; /* Light gray background */
     color: #333;
+    font-size: 16px;
+    padding: 20px;
+}
+
+/* Header Styling */
+h1 {
+    font-size: 2rem;
+    color: #6d4c41; /* Warm brown color */
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid #6d4c41;
+    padding-bottom: 10px;
+}
+
+/* Profile container */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Section styling */
+section {
+    margin-bottom: 25px;
+}
+
+/* Profile picture styling */
+.profile-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
     margin-bottom: 15px;
+    object-fit: cover;
 }
 
-/* Стили для отсутствующего email */
-.no-email {
-    color: red;
+/* Section headings */
+h2 {
+    font-size: 1.5rem;
+    color: #6d4c41;
+    margin-bottom: 10px;
+    text-align: left;
+    border-bottom: 2px solid #6d4c41;
+    padding-bottom: 5px;
 }
 
-/* Стили для кнопок */
-.btn {
-    background-color: #007BFF;
-    color: #fff;
+/* Form and input styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Input fields and buttons */
+input[type="text"],
+input[type="password"],
+textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #555;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button[type="submit"],
+a.btn {
     padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 4px;
+    background-color: #6d4c41;
+    color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
     display: inline-block;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover,
+a.btn:hover {
+    background-color: #8e6b51;
+}
+
+/* Logout link */
+a[href="/logout"] {
+    display: inline-block;
+    padding: 10px;
+    text-decoration: none;
+    background-color: #e57373;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+a[href="/logout"]:hover {
+    background-color: #d32f2f;
+}
+
+/* Labels and text */
+label {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+/* Button and link spacing */
+.btn,
+a.btn {
     margin-top: 10px;
 }
 
-.btn:hover {
-    background-color: #0056b3;
-}
-
-/* Стили для формы */
-form {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="file"],
+/* Bio text area */
 textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    min-height: 150px;
+    font-family: 'Arial', sans-serif;
+    background-color: #fafafa;
 }
 
-/* Стили для секций */
-section {
-    margin-bottom: 30px;
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    section {
+        margin-bottom: 20px;
+    }
+
+    .profile-image {
+        width: 150px;
+        height: 150px;
+    }
+
+    button[type="submit"],
+    a.btn {
+        width: 100%;
+        padding: 12px;
+    }
 }

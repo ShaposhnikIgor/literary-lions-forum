@@ -1,0 +1,111 @@
+/* Base styling */
+body {
+    font-family: Arial, sans-serif;
+    color: #5A3E2B;
+    margin: 0;
+    background-image: url('/assets/static/images/8-781O9E1DgtqXnlZ.png'); /* Adjust path if needed */
+    background-size: cover; /* Ensures image covers full page */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents tiling */
+    background-attachment: fixed; /* Keeps the image fixed when scrolling */
+}
+
+/* Navbar styling */
+.navbar {
+    background-color: #8C5B3A; /* Rich brown for navbar */
+    color: #F5EDE2;
+    padding: 15px 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 1.2em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+}
+
+.navbar a {
+    color: #F5EDE2;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #D9B791; /* Lighter brown on hover */
+}
+
+/* Main content area */
+.container {
+    background-color: rgba(245, 237, 226, 0.9); /* Soft, semi-transparent overlay */
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 800px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Headings */
+h1, h2 {
+    color: #8C5B3A; /* Harmonize with navbar color */
+    text-align: center;
+    font-family: 'Georgia', serif;
+    margin-top: 10px;
+}
+
+h1 {
+    font-size: 2.4em;
+}
+
+h2 {
+    font-size: 1.8em;
+    font-weight: normal;
+    margin-top: 0;
+}
+
+/* Links and lists */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li a {
+    display: block;
+    padding: 10px 15px;
+    background-color: #C4A484;
+    color: #F7F0E7;
+    text-decoration: none;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+ul li a:hover {
+    background-color: #A67B55; /* Deeper shade on hover */
+    transform: scale(1.05);
+}
+
+/* Button styling */
+button, .home-link {
+    background-color: #8C5B3A;
+    color: #F7F0E7;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button:hover, .home-link:hover {
+    background-color: #A67B55;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top: 20px;
+}
