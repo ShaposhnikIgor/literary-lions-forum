@@ -116,10 +116,37 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Fetch categories from the database
+	rowsCategory, err := db.Query("SELECT id, name FROM categories")
+	if err != nil {
+		log.Printf("Ошибка загрузки категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+	defer rowsCategory.Close()
+
+	var categories []models.Category
+	for rowsCategory.Next() {
+		var category models.Category
+		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+			log.Printf("Ошибка при чтении категории: %v", err)
+			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, category)
+	}
+
+	if err := rowsCategory.Err(); err != nil {
+		log.Printf("Ошибка при обработке категорий: %v", err)
+		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		return
+	}
+
 	// Передача данных в шаблон
 	pageData := models.UserCommentsPageData{
-		User:     user,
-		Comments: comments,
+		User:       user,
+		Comments:   comments,
+		Categories: categories,
 	}
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user_comments.html")

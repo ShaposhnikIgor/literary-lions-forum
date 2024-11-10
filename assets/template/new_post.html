@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create a post</title>
     <link rel="stylesheet" href="/assets/static/new_post.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
+    <div class="container">
     <h1>Create new post</h1>
-    <form action="/new-post" method="POST">
+    <form class="new-post-form" action="/new-post" method="POST">
         <label for="title">The header:</label>
         <input type="text" name="title" id="title" required>
         <br>
@@ -26,6 +28,10 @@
         <br>
         <button type="submit">Publish</button>
     </form>
+</div>
+<footer>
+    <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+</footer>
 </body>
 </html>
 {{end}}

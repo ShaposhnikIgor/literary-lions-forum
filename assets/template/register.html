@@ -11,12 +11,17 @@
         }
     </style>
     <link rel="stylesheet" href="/assets/static/register.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
-   
+    <div class="container">
     <h2>Register</h2>
-    <form action="/register" method="POST">
+    <!-- Блок для отображения ошибки -->
+    {{if .Error}}
+    <div class="error">{{.Error}}</div>
+    {{end}}
+    <form class="register-form" action="/register" method="POST">
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username" required><br><br>
 
@@ -35,12 +40,7 @@
         <input type="text" id="captcha" name="captcha" required><br><br>
 
         <input type="submit" value="Register">
-    </form>
-
-    <!-- Блок для отображения ошибки -->
-    {{if .Error}}
-    <div class="error">{{.Error}}</div>
-    {{end}}
+    </form>    
 
     <script>
         function togglePassword() {
@@ -49,6 +49,10 @@
             passwordField.setAttribute("type", type);
         }
     </script>
+    </div>
+    <footer>
+        <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+    </footer>
 </body>
 </html>
 {{end}}

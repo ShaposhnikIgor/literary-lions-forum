@@ -35,7 +35,7 @@ func createTables(db *sql.DB) error {
         role TEXT DEFAULT 'member',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		bio TEXT,
-		profile_image TEXT 
+		profile_image TEXT DEFAULT 'assets/static/images/placeholder.png'
     );`
 
 	createCategoriesTable := `

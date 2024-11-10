@@ -7,21 +7,27 @@
     <title>Все посты</title>
     <link rel="stylesheet" href="/assets/static/all_posts.css">
     <link rel="stylesheet" href="/assets/static/search_results.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
+    <div class="container">
     <h3>Search results for: "{{.Query}}"</h3>
 {{if .Results}}
     <ul>
         {{range .Results}}
             <li>
-                <a href="/post/{{.ID}}">{{.Title}}</a> - {{.CreatedAt.Format "02.01.2006"}}
+                <a href="/post/{{.ID}}">{{.Title}}</a>{{.CreatedAt.Format "02.01.2006"}}
             </li>
         {{end}}
     </ul>
 {{else}}
     <p>No results by query.</p>
 {{end}}
+</div>
+<footer>
+    <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+</footer>
 </body>
 </html>
 {{end}}

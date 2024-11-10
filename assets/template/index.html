@@ -9,23 +9,7 @@
     <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>    
-
-    <!-- Navbar at the top as header -->
-    <nav class="navbar">
-        <div class="left-links">
-            <a href="/all_posts">All Posts</a>
-            <a href="/categories">Categories</a>
-            <a href="/search">Search</a>
-        </div>
-        <div class="right-links">
-            {{if .User}}
-                <a href="/user">{{.User.Username}}</a> | <a href="/logout">Logout</a>
-            {{else}}
-                <a href="/login">Login</a> | <a href="/register">Register</a>
-            {{end}}
-        </div>
-    </nav>
-
+    {{template "header" .}}
     <div class="container">
         <h1>Welcome to Literary Lions!</h1>
         <h2>The latest posts:</h2>

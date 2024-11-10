@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All posts</title>
     <link rel="stylesheet" href="/assets/static/all_posts.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
@@ -14,13 +15,17 @@
         {{range .Posts}}
             <div class="post">
                 <h2><a href="/post/{{.ID}}">{{.Title}}</a></h2>
-                <p><small>Author: {{.UserID}} | Published: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+                <p><small>Author: {{.Author}} | Published: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
+                <p>{{.CategoryName}}</p>
                 <p>{{.Body}}</p>
             </div>
         {{else}}
             <p>No accessible posts.</p>
         {{end}}
     </div>
+    <footer>
+        <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+    </footer>
 </body>
 </html>
 {{end}}

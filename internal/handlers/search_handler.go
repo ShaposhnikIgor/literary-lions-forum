@@ -18,7 +18,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Base query to search for posts
 	var results []models.Post
 	var queryBuilder strings.Builder
-	queryBuilder.WriteString("SELECT id, title, body, created_at, category_id FROM posts WHERE title LIKE ? OR body LIKE ?")
+	queryBuilder.WriteString("SELECT id, title, body, created_at, category_id FROM posts WHERE (title LIKE ? OR body LIKE ?)")
 	params := []interface{}{"%" + query + "%", "%" + query + "%"}
 
 	// If a category is selected, filter the search by category

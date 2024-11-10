@@ -25,14 +25,14 @@ h2 {
 }
 
 /* Login container */
-.login-container {
+.container {
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
-    margin-top: 20px;
+    margin-top: 140px;
 }
 
 /* Error message */
@@ -46,7 +46,7 @@ h2 {
 }
 
 /* Form styling */
-form {
+.login-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -106,4 +106,13 @@ input[type="submit"]:active {
         font-size: 14px;
         padding: 10px;
     }
+}
+
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top: 20px;
 }

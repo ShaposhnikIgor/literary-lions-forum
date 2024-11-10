@@ -399,19 +399,19 @@ func serveRegistrationPage(w http.ResponseWriter, r *http.Request, db *sql.DB, e
 func validateCaptcha(r *http.Request, captchaInput string) (bool, error) {
 	cookie, err := r.Cookie("captcha_answer")
 	if err != nil {
-		return false, fmt.Errorf("Капча отсутствует или истек срок действия")
+		return false, fmt.Errorf("капча отсутствует или истек срок действия")
 	}
 
 	captchaJSON, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		log.Printf("Ошибка декодирования капчи: %v", err)
-		return false, fmt.Errorf("Ошибка декодирования капчи")
+		return false, fmt.Errorf("ошибка декодирования капчи")
 	}
 
 	var captcha utils.Captcha
 	if err := json.Unmarshal(captchaJSON, &captcha); err != nil {
 		log.Printf("Ошибка десериализации капчи: %v", err)
-		return false, fmt.Errorf("Ошибка десериализации капчи")
+		return false, fmt.Errorf("oшибка десериализации капчи")
 	}
 
 	return utils.VerifyCaptcha(captchaInput, captcha), nil

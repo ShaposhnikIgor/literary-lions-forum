@@ -40,6 +40,7 @@ a:hover {
     background-color: rgba(255, 248, 240, 0.9); /* Light background with some transparency */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 140px;
 }
 
 .category {
@@ -84,4 +85,13 @@ a:hover {
     h2 {
         font-size: 1.4rem;
     }
+}
+
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top: 20px;
 }

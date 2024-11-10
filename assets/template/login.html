@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login to the site</title>
     <link rel="stylesheet" href="/assets/static/login.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
 
-<div class="login-container">
+<div class="container">
     <h2>Login</h2>
 
     <!-- Блок для отображения ошибки -->
@@ -18,7 +19,7 @@
     <div class="error">{{.Error}}</div>
     {{end}}
 
-    <form action="/login" method="POST">
+    <form class="login-form" action="/login" method="POST">
         <label for="username">User name:</label>
         <input type="text" id="username or email" name="username or email" placeholder="Enter user name" required>
 
@@ -28,7 +29,9 @@
         <input type="submit" value="Login">
     </form>
 </div>
-
+<footer>
+    <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+</footer>
 </body>
 </html>
 {{end}}

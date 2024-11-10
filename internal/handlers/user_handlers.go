@@ -295,71 +295,68 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 // 		return
 // 	}
 
-// 	file, _, err := r.FormFile("profile_image")
+// 	// Получение ID пользователя из сессии
+// 	userID, err := GetUserIDFromSession(r, db)
+// 	if err != nil {
+// 		log.Printf("Ошибка получения ID пользователя из сессии: %v", err)
+// 		http.Error(w, "Ошибка сессии", http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	// Получение текущего пути к изображению профиля из базы данных
+// 	var oldFilePath string
+// 	err = db.QueryRow("SELECT profile_image FROM users WHERE id = ?", userID).Scan(&oldFilePath)
+// 	if err != nil && err != sql.ErrNoRows {
+// 		log.Printf("Ошибка получения пути к старому изображению: %v", err)
+// 		http.Error(w, "Ошибка загрузки профиля", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Чтение файла из формы
+// 	file, header, err := r.FormFile("profile_image")
 // 	if err != nil {
 // 		http.Error(w, "Ошибка загрузки файла", http.StatusInternalServerError)
 // 		return
 // 	}
 // 	defer file.Close()
 
-// 	// Здесь можно сохранить файл на сервере
-// 	// Пример: ioutil.WriteFile("/path/to/images/" + handler.Filename, file, 0644)
+// 	// Создание пути для сохранения нового изображения
+// 	filePath := fmt.Sprintf("assets/static/images/uploads/%d_%s", userID, header.Filename)
 
+// 	// Удаление старого файла, если он существует
+// 	if oldFilePath != "" {
+// 		if err := os.Remove(oldFilePath); err != nil {
+// 			log.Printf("Ошибка при удалении старого файла: %v", err)
+// 		}
+// 	}
+
+// 	// Сохранение нового файла на сервере
+// 	out, err := os.Create(filePath)
+// 	if err != nil {
+// 		log.Printf("Error saving file: %v", err)
+// 		http.Error(w, "Ошибка сохранения файла", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	defer out.Close()
+
+// 	// Копирование содержимого загруженного файла в созданный файл
+// 	_, err = io.Copy(out, file)
+// 	if err != nil {
+// 		http.Error(w, "Ошибка копирования файла", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Обновление пути к изображению в базе данных
+// 	_, err = db.Exec("UPDATE users SET profile_image = ? WHERE id = ?", filePath, userID)
+// 	if err != nil {
+// 		log.Printf("Ошибка сохранения пути к изображению в базе данных: %v", err)
+// 		http.Error(w, "Ошибка сохранения изображения", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Перенаправление на страницу пользователя
 // 	http.Redirect(w, r, "/user", http.StatusSeeOther)
 // }
-
-func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Получение ID пользователя из сессии
-	userID, err := GetUserIDFromSession(r, db)
-	if err != nil {
-		log.Printf("Ошибка получения ID пользователя из сессии: %v", err)
-		http.Error(w, "Ошибка сессии", http.StatusUnauthorized)
-		return
-	}
-
-	// Чтение файла из формы
-	file, header, err := r.FormFile("profile_image")
-	if err != nil {
-		http.Error(w, "Ошибка загрузки файла", http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-
-	// Создание пути для сохранения изображения
-	filePath := fmt.Sprintf("uploads/%d_%s", userID, header.Filename)
-
-	// Сохранение файла на сервере
-	out, err := os.Create(filePath)
-	if err != nil {
-		log.Printf("Error saving file: %v", err)
-		http.Error(w, "Ошибка сохранения файла", http.StatusInternalServerError)
-		return
-	}
-	defer out.Close()
-
-	// Копирование содержимого загруженного файла в созданный файл
-	_, err = io.Copy(out, file)
-	if err != nil {
-		http.Error(w, "Ошибка копирования файла", http.StatusInternalServerError)
-		return
-	}
-
-	// Обновление пути к изображению в базе данных
-	_, err = db.Exec("UPDATE users SET profile_image = ? WHERE id = ?", filePath, userID)
-	if err != nil {
-		log.Printf("Ошибка сохранения пути к изображению в базе данных: %v", err)
-		http.Error(w, "Ошибка сохранения изображения", http.StatusInternalServerError)
-		return
-	}
-
-	// Перенаправление на страницу пользователя
-	http.Redirect(w, r, "/user", http.StatusSeeOther)
-}
 
 func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userID, err := GetUserIDFromSession(r, db)
@@ -393,6 +390,80 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// Отправка файла
 	http.ServeFile(w, r, filePath)
+}
+
+func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Получение ID пользователя из сессии
+	userID, err := GetUserIDFromSession(r, db)
+	if err != nil {
+		log.Printf("Ошибка получения ID пользователя из сессии: %v", err)
+		http.Error(w, "Ошибка сессии", http.StatusUnauthorized)
+		return
+	}
+
+	// Получение текущего пути к изображению профиля из базы данных
+	var oldFilePath string
+	err = db.QueryRow("SELECT profile_image FROM users WHERE id = ?", userID).Scan(&oldFilePath)
+	if err != nil && err != sql.ErrNoRows {
+		log.Printf("Ошибка получения пути к старому изображению: %v", err)
+		http.Error(w, "Ошибка загрузки профиля", http.StatusInternalServerError)
+		return
+	}
+
+	// If no profile image is set in the database, set placeholder as default
+	if oldFilePath == "" {
+		oldFilePath = "assets/static/images/placeholder.png" // Default placeholder image
+	}
+
+	// Чтение файла из формы
+	file, header, err := r.FormFile("profile_image")
+	if err != nil {
+		http.Error(w, "Ошибка загрузки файла", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	// Создание пути для сохранения нового изображения
+	filePath := fmt.Sprintf("assets/static/images/uploads/%d_%s", userID, header.Filename)
+
+	// Удаление старого файла, если он существует и это не изображение по умолчанию
+	if oldFilePath != "assets/static/images/placeholder.png" {
+		if err := os.Remove(oldFilePath); err != nil {
+			log.Printf("Ошибка при удалении старого файла: %v", err)
+		}
+	}
+
+	// Сохранение нового файла на сервере
+	out, err := os.Create(filePath)
+	if err != nil {
+		log.Printf("Error saving file: %v", err)
+		http.Error(w, "Ошибка сохранения файла", http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+
+	// Копирование содержимого загруженного файла в созданный файл
+	_, err = io.Copy(out, file)
+	if err != nil {
+		http.Error(w, "Ошибка копирования файла", http.StatusInternalServerError)
+		return
+	}
+
+	// Обновление пути к изображению в базе данных
+	_, err = db.Exec("UPDATE users SET profile_image = ? WHERE id = ?", filePath, userID)
+	if err != nil {
+		log.Printf("Ошибка сохранения пути к изображению в базе данных: %v", err)
+		http.Error(w, "Ошибка сохранения изображения", http.StatusInternalServerError)
+		return
+	}
+
+	// Перенаправление на страницу пользователя
+	http.Redirect(w, r, "/user", http.StatusSeeOther)
 }
 
 func HandleChangeBio(w http.ResponseWriter, r *http.Request, db *sql.DB) {

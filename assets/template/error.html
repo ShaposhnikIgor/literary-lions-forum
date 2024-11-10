@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.ErrorTitle}}</title>
     <link rel="stylesheet" href="/assets/static/error.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
@@ -15,6 +16,9 @@
         <img src="{{.ImagePath}}" alt="Error image" class="error-image">
         <a href="/" class="home-link">Return to Home</a>
     </div>
+    <footer>
+        <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+    </footer>
 </body>
 </html>
 {{end}}

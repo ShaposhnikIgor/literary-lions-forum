@@ -1,7 +1,7 @@
 /* General Header Layout */
 .header {
     background-color: #6b4f3d;
-    padding: 20px 30px;
+    /* padding: 20px 30px; */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -69,11 +69,13 @@ nav ul li a:hover {
     font-size: 1rem;
     border: none;
     border-radius: 5px;
+    margin-bottom: 0px;
 }
 
 .search-form input,
 .search-form select {
     width: 200px;
+    margin-bottom: 0px;
 }
 
 .search-form button {
@@ -97,7 +99,114 @@ nav ul li a:hover {
     background-color: #f5f3e6;
     color: #5a3e2b;
     border: 1px solid #8b5c42;
+    margin-bottom: 0px;
 }
+
+.logo-link{
+    width: 80px;
+    padding: 0px !important;
+    display: inline-block;
+    background-color: #6b4f3d !important;
+}
+
+/* Logo Image Styling */
+.logo {
+    width: 120px; /* Set a base width */
+    height: auto; /* Maintain aspect ratio */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transitions for hover effects */
+}
+
+/* Logo Hover Effect */
+.logo-link:hover .logo {
+    transform: scale(1.05); /* Slight zoom on hover */
+    opacity: 0.9;
+}
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    padding: 20px 30px;
+    width: 100%;
+}
+
+/* .navbar .left-links,
+.navbar .right-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+} */
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+/* .navbar .left-links,
+.navbar .right-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+} */
+
+/* Links Styling */
+.navbar a {
+    color: #f5f3e6;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #8b5c42;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.navbar a:hover {
+    background-color: #6b4f3d;
+    transform: scale(1.05);
+}
+
+.navbar a {
+    color: #F5EDE2;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #D9B791; 
+} 
+
+/* Links Styling */
+/* .navbar a {
+    color: #f5f3e6;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #8b5c42;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.navbar a:hover {
+    background-color: #6b4f3d;
+    transform: scale(1.05);
+}
+
+.navbar a {
+    color: #F5EDE2;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #D9B791; 
+}  */
 
 /* Ensure Flexbox is Applied on Small Screens */
 @media (max-width: 768px) {
@@ -124,5 +233,73 @@ nav ul li a:hover {
     .search-form input,
     .search-form select {
         width: 150px;
+        margin-bottom: 0px;
+    }
+}
+
+/* Search Form Styling */
+.search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-form input,
+.search-form select,
+.search-form button {
+    padding: 10px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 0px;
+}
+
+.search-form input,
+.search-form select {
+    background-color: #f5f3e6;
+    color: #5a3e2b;
+    border: 1px solid #8b5c42;
+    width: 200px;
+    margin-bottom: 0px;
+}
+
+.search-form button {
+    background-color: #8b5c42;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-form button:hover {
+    background-color: #6b4f3d;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        padding: 15px;
+        align-items: flex-start;
+    }
+
+    .logo {
+        width: 100px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .search-form {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .search-form input,
+    .search-form select {
+        width: 150px;
+        margin-bottom: 0px;
     }
 }

@@ -32,6 +32,7 @@ h1 {
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    margin-top: 140px;
 }
 
 /* Section styling */
@@ -59,7 +60,7 @@ h2 {
 }
 
 /* Form and input styling */
-form {
+.user-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -167,4 +168,13 @@ textarea {
         width: 100%;
         padding: 12px;
     }
+}
+
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top: 20px;
 }

@@ -3,9 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Post.Title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
     <link rel="stylesheet" href="/assets/static/post.css">
+    <link rel="stylesheet" href="/assets/static/header.css">
+    <title>{{.Post.Title}}</title>
 </head>
 <body>
     {{template "header" .}}
@@ -80,6 +81,9 @@
 {{else}}
     <p>No comments</p>
 {{end}}
+<footer>
+    <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+</footer>
 
 </body>
 </html>

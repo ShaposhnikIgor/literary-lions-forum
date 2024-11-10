@@ -106,3 +106,12 @@ p {
         font-size: 0.95rem;
     }
 }
+
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top: 20px;
+}

@@ -86,6 +86,10 @@ func main() {
 		handlers.CommentLikeHandler(w, r, db)
 	})
 
+	http.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandleErrorPage(w, r, db)
+	})
+
 	// Start the HTTP server on port 8080
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -12,11 +12,13 @@ import (
 func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/error", http.StatusMethodNotAllowed)
 		return
 	}
 
 	if r.URL.Path != "/" {
 		http.Error(w, "Страница не найдена", http.StatusNotFound)
+		http.Redirect(w, r, "/error", http.StatusNotFound)
 		return
 	}
 

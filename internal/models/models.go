@@ -28,12 +28,14 @@ type Category struct {
 
 // Post - структура для представления постов
 type Post struct {
-	ID         int       `db:"id"`
-	UserID     int       `db:"user_id"`
-	Title      string    `db:"title"`
-	Body       string    `db:"body"`
-	CategoryID int       `db:"category_id"`
-	CreatedAt  time.Time `db:"created_at"`
+	ID           int       `db:"id"`
+	UserID       int       `db:"user_id"`
+	Title        string    `db:"title"`
+	Body         string    `db:"body"`
+	CategoryID   int       `db:"category_id"`
+	CreatedAt    time.Time `db:"created_at"`
+	Author       string
+	CategoryName string
 }
 
 // Comment - структура для представления комментариев
@@ -110,8 +112,9 @@ type UserPageData struct {
 }
 
 type UserCommentsPageData struct {
-	User     *User
-	Comments []Comment
+	User       *User
+	Comments   []Comment
+	Categories []Category
 }
 
 type SearchResultsPageData struct {
