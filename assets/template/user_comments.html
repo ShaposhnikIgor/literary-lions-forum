@@ -16,7 +16,7 @@
         {{if .Comments}}
             {{range .Comments}}
                 <div class="comment">
-                    <h3>Пост: {{.Title}}</h3>
+                    <h3>Post: {{.Title}}</h3>
                     <p>{{.Body}}</p>
                     <p><small>Created: {{.CreatedAt.Format "02.01.2006 15:04"}}</small></p>
                     <a href="/post/{{.PostID}}">Go to the post</a>

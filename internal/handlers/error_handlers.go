@@ -26,7 +26,7 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 			user = &models.User{}
 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
 			if err != nil {
-				log.Printf("Ошибка при получении пользователя: %v", err)
+				log.Printf("Error getting the user: %v", err)
 			}
 		}
 	}
@@ -34,8 +34,8 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 	// Получите категории
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 	defer rowsCategory.Close()
@@ -44,8 +44,8 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 	for rowsCategory.Next() {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 			return
 		}
 		categories = append(categories, category)
@@ -62,13 +62,13 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 	// Парсинг и рендеринг шаблона
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/error.html")
 	if err != nil {
-		log.Printf("Ошибка загрузки шаблона: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
+		log.Printf("Error loading template: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 	if err := tmpl.ExecuteTemplate(w, "error", pageData); err != nil {
-		log.Printf("Ошибка рендеринга страницы ошибки: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы ошибки")
+		log.Printf("Rendering error of error page: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Rendering error of error page")
 		return
 	}
 }

@@ -15,12 +15,12 @@ import (
 
 func HandleLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method is not supported")
 		return
 	}
 
 	if r.URL.Path != "/login" {
-		RenderErrorPage(w, r, db, http.StatusNotFound, "Страница не найдена")
+		RenderErrorPage(w, r, db, http.StatusNotFound, "Page not found")
 		return
 	}
 
@@ -39,30 +39,30 @@ func HandleLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 		if err != nil {
 			if err == sql.ErrNoRows {
-				renderLoginPage(w, r, db, "Неверное имя пользователя, email или пароль")
+				renderLoginPage(w, r, db, "Incorrect user's name, email or password")
 			} else {
-				log.Printf("Ошибка при Поиск пользователя по имени: %v", err)
-				RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка базы данных")
+				log.Printf("Error searching user by name: %v", err)
+				RenderErrorPage(w, r, db, http.StatusInternalServerError, "Database error")
 			}
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			renderLoginPage(w, r, db, "Неверное имя пользователя, email или пароль")
+			renderLoginPage(w, r, db, "Incorrect user's name, email or password")
 			return
 		}
 
 		sessionToken, err := utils.CreateSessionToken()
 		if err != nil {
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка создания сессионного токена")
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error creating session token")
 			return
 		}
 
 		_, err = db.Exec("INSERT INTO sessions (user_id, session_token, created_at) VALUES (?, ?, ?)", user.ID, sessionToken, time.Now())
 		if err != nil {
-			log.Printf("Ошибка при Вставка сессии в базу данных: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка создания сессии")
+			log.Printf("Error adding session to database: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error creating session")
 			return
 		}
 
@@ -83,8 +83,8 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request, db *sql.DB, errorMe
 	// Fetch categories from the database
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 	defer rowsCategory.Close()
@@ -93,16 +93,16 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request, db *sql.DB, errorMe
 	for rowsCategory.Next() {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка создания сессионного токена")
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error creating session token")
 			return
 		}
 		categories = append(categories, category)
 	}
 
 	if err := rowsCategory.Err(); err != nil {
-		log.Printf("Ошибка при обработке категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error parsing categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 
@@ -114,16 +114,16 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request, db *sql.DB, errorMe
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/login.html")
 	if err != nil {
-		log.Printf("Ошибка загрузки шаблона: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
+		log.Printf("Error loading template: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/html")
 	err = tmpl.ExecuteTemplate(w, "login", pageData)
 	if err != nil {
-		log.Printf("Ошибка рендеринга: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
+		log.Printf("Rendering error: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error rendering page")
 	}
 }
 
@@ -137,7 +137,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Удаляем сессию из базы данных
 	_, err = db.Exec("DELETE FROM sessions WHERE session_token = ?", cookie.Value)
 	if err != nil {
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка удаления сессии")
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error deleting the session")
 		return
 	}
 

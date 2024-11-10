@@ -6,36 +6,40 @@
     font-family: 'Arial', sans-serif;
 }
 
+html, body {
+    height: 100%; /* Full height to enable flex layout */
+    margin: 0;
+}
+
 body {
-    background-color: #f4f1e1; /* Light warm background */
+    background-color: #f4f1e1;
     color: #333;
     font-size: 16px;
     line-height: 1.6;
+}
+
+/* Main page container to hold content and footer */
+.page-container {
     display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Full viewport height */
+}
+
+.container {
+    flex: 1; /* Takes up available space */
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     padding: 20px;
 }
 
 h2 {
     text-align: center;
-    color: #7a4c3c; /* Warm brown */
+    color: #7a4c3c;
     margin-bottom: 20px;
 }
 
-/* Login container */
-.container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    margin-top: 140px;
-}
-
-/* Error message */
 .error {
     background-color: #f8d7da;
     color: #721c24;
@@ -43,6 +47,17 @@ h2 {
     padding: 10px;
     border-radius: 4px;
     margin-bottom: 20px;
+}
+
+/* Framed login form container */
+.login-form-container {
+    background-color: #fff; /* White background for the frame */
+    padding: 30px;
+    border: 2px solid #7a4c3c; /* Border color matching the theme */
+    border-radius: 8px; /* Rounded corners for the frame */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow around the frame */
+    width: 100%;
+    max-width: 400px; /* Limits the width of the form */
 }
 
 /* Form styling */
@@ -54,7 +69,7 @@ h2 {
 
 label {
     font-weight: bold;
-    color: #7a4c3c; /* Warm brown */
+    color: #7a4c3c;
 }
 
 input[type="text"],
@@ -68,12 +83,12 @@ input[type="password"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border-color: #7a4c3c; /* Focus effect */
+    border-color: #7a4c3c;
     outline: none;
 }
 
 input[type="submit"] {
-    background-color: #7a4c3c; /* Warm brown */
+    background-color: #7a4c3c;
     color: white;
     padding: 12px;
     border: none;
@@ -84,19 +99,15 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-    background-color: #5e3523; /* Darker brown on hover */
+    background-color: #5e3523;
 }
 
 input[type="submit"]:active {
-    background-color: #48211a; /* Even darker on active click */
+    background-color: #48211a;
 }
 
-/* Responsive styles */
+/* Responsive adjustments */
 @media (max-width: 600px) {
-    .login-container {
-        padding: 20px;
-    }
-
     input[type="text"],
     input[type="password"] {
         font-size: 14px;
@@ -108,11 +119,11 @@ input[type="submit"]:active {
     }
 }
 
+/* Footer styling to stay at the bottom */
 footer {
+    background-color: #6b4f3d;
+    color: #f5f3e6;
     text-align: center;
-    background-color: #8C5B3A;
-    color: #F5EDE2;
     padding: 10px 0;
-    font-size: 0.9em;
-    margin-top: 20px;
+    width: 100%;
 }

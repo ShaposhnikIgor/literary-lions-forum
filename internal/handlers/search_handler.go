@@ -27,7 +27,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		categoryID, err := strconv.Atoi(category)
 		if err != nil {
 			// Handle invalid category format (if not a number)
-			RenderErrorPage(w, r, db, http.StatusBadRequest, "Неверный формат категории")
+			RenderErrorPage(w, r, db, http.StatusBadRequest, "Incorrect format of category")
 			return
 		}
 
@@ -40,7 +40,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query(queryBuilder.String(), params...)
 	fmt.Println(queryBuilder.String(), params)
 	if err != nil {
-		log.Printf("Ошибка при поиске: %v", err)
+		log.Printf("Error when searching: %v", err)
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
@@ -50,14 +50,14 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.Title, &post.Body, &post.CreatedAt, &post.CategoryID); err != nil {
-			log.Printf("Ошибка при чтении поста: %v", err)
+			log.Printf("Error reading post: %v", err)
 			continue
 		}
 		results = append(results, post)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("Ошибка при обработке результатов: %v", err)
+		log.Printf("Error parsing results: %v", err)
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
@@ -72,7 +72,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			user = &models.User{}
 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
 			if err != nil {
-				log.Printf("Ошибка при получении пользователя: %v", err)
+				log.Printf("Error getting the user: %v", err)
 			}
 		}
 	}
@@ -80,8 +80,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Fetch categories from the database (to populate the category filter)
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 	defer rowsCategory.Close()
@@ -90,8 +90,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	for rowsCategory.Next() {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 			return
 		}
 		categories = append(categories, category)
@@ -99,8 +99,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// Check for any errors while reading category rows
 	if err := rowsCategory.Err(); err != nil {
-		log.Printf("Ошибка при обработке категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error parsing categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 
@@ -115,15 +115,15 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Render the search results page
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/search_results.html")
 	if err != nil {
-		log.Printf("Ошибка загрузки шаблона: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
+		log.Printf("Error loading template: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "search_results", pageData)
 	if err != nil {
-		log.Printf("Ошибка рендеринга страницы: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
+		log.Printf("Rendering page error: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Rendering page error")
 		return
 	}
 }

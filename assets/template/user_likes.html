@@ -15,7 +15,7 @@
         {{range .Likes}}
             <div class="like">
                 {{if eq .TargetType "post"}}
-                    <p>Пост: <a href="/post/{{.TargetID}}">Review a post</a></p>
+                    <p>Post: <a href="/post/{{.TargetID}}">Review a post</a></p>
                 {{else if eq .TargetType "comment"}}
                     <p>Comments: <a href="/comment/{{.TargetID}}">Review comments</a></p>
                 {{end}}

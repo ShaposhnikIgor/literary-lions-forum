@@ -33,7 +33,7 @@ func GetUserIDFromSession(r *http.Request, db *sql.DB) (int, error) {
 
 func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method is not supported")
 		return
 	}
 
@@ -47,7 +47,7 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			user = &models.User{}
 			err = db.QueryRow("SELECT id, username, email, COALESCE(bio, ''), COALESCE(profile_image, '') FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username, &user.Email, &user.Bio, &user.ProfImage)
 			if err != nil {
-				log.Printf("Ошибка при получении пользователя: %v", err)
+				log.Printf("Error getting the user: %v", err)
 			}
 		}
 	}
@@ -55,8 +55,8 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Fetch categories from the database
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 	defer rowsCategory.Close()
@@ -65,16 +65,16 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	for rowsCategory.Next() {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 			return
 		}
 		categories = append(categories, category)
 	}
 
 	if err := rowsCategory.Err(); err != nil {
-		log.Printf("Ошибка при обработке категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error parsing categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 
@@ -86,8 +86,8 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user.html")
 	if err != nil {
-		log.Printf("Ошибка загрузки шаблона: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
+		log.Printf("Error loading template: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 
@@ -97,22 +97,22 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Execute the "index" template as the main entry point
 	err = tmpl.ExecuteTemplate(w, "user", pageData)
 	if err != nil {
-		log.Printf("Ошибка рендеринга: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
+		log.Printf("Rendering error: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Rendering page error")
 		return
 	}
 }
 
 func HandleChangeUsername(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method not supported")
 		return
 	}
 
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
-		log.Printf("Ошибка при GetUserIDFromSession HandleChangeUsername: %v", err)
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
+		log.Printf("Error when GetUserIDFromSession HandleChangeUsername: %v", err)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
 		return
 	}
 
@@ -129,15 +129,15 @@ func HandleChangeUsername(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method not supported")
 		return
 	}
 
 	// Получение ID пользователя из сессии
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
-		log.Printf("Ошибка при GetUserIDFromSession в HandleChangePassword: %v", err)
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
+		log.Printf("Error when GetUserIDFromSession в HandleChangePassword: %v", err)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
 		return
 	}
 
@@ -147,7 +147,7 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	confirmPassword := r.FormValue("confirm_password")
 
 	if newPassword != confirmPassword {
-		RenderErrorPage(w, r, db, http.StatusBadRequest, "Пароли не совпадают")
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Passwords don't match")
 		return
 	}
 
@@ -155,7 +155,7 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var passwordHash string
 	err = db.QueryRow("SELECT password_hash FROM users WHERE id = ?", userID).Scan(&passwordHash)
 	if err != nil {
-		log.Printf("Ошибка при получении password_hash: %v", err)
+		log.Printf("Error getting password_hash: %v", err)
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
@@ -163,7 +163,7 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Проверка текущего пароля
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(currentPassword))
 	if err != nil {
-		RenderErrorPage(w, r, db, http.StatusBadRequest, "Неверный текущий пароль")
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Incorrect current password")
 		return
 	}
 
@@ -177,7 +177,7 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Обновление пароля в базе данных
 	_, err = db.Exec("UPDATE users SET password_hash = ? WHERE id = ?", newHashedPassword, userID)
 	if err != nil {
-		log.Printf("Ошибка при обновлении пароля: %v", err)
+		log.Printf("Error updating password: %v", err)
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
@@ -189,7 +189,7 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
 		return
 	}
 
@@ -197,8 +197,8 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var filePath string
 	err = db.QueryRow("SELECT COALESCE(profile_image, '') FROM users WHERE id = ?", userID).Scan(&filePath)
 	if err != nil {
-		log.Printf("Ошибка при извлечении пути к изображению: %v", err)
-		RenderErrorPage(w, r, db, http.StatusNotFound, "Изображение не найдено")
+		log.Printf("Error getting the picture path: %v", err)
+		RenderErrorPage(w, r, db, http.StatusNotFound, "Picture is not found")
 		return
 	}
 
@@ -212,7 +212,7 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	case ".gif":
 		w.Header().Set("Content-Type", "image/gif")
 	default:
-		RenderErrorPage(w, r, db, http.StatusUnsupportedMediaType, "Неподдерживаемый формат изображения")
+		RenderErrorPage(w, r, db, http.StatusUnsupportedMediaType, "Format of the image is not supported")
 		return
 	}
 
@@ -222,15 +222,15 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method not supported")
 		return
 	}
 
 	// Получение ID пользователя из сессии
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
-		log.Printf("Ошибка получения ID пользователя из сессии: %v", err)
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
+		log.Printf("Error getting ID of user from the session: %v", err)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
 		return
 	}
 
@@ -238,8 +238,8 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 	var oldFilePath string
 	err = db.QueryRow("SELECT profile_image FROM users WHERE id = ?", userID).Scan(&oldFilePath)
 	if err != nil && err != sql.ErrNoRows {
-		log.Printf("Ошибка получения пути к старому изображению: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки профиля")
+		log.Printf("Error getting the path to an old image: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading profile")
 		return
 	}
 
@@ -262,7 +262,7 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 	// Удаление старого файла, если он существует и это не изображение по умолчанию
 	if oldFilePath != "assets/static/images/placeholder.png" {
 		if err := os.Remove(oldFilePath); err != nil {
-			log.Printf("Ошибка при удалении старого файла: %v", err)
+			log.Printf("Error deleting the old file: %v", err)
 		}
 	}
 
@@ -285,7 +285,7 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 	// Обновление пути к изображению в базе данных
 	_, err = db.Exec("UPDATE users SET profile_image = ? WHERE id = ?", filePath, userID)
 	if err != nil {
-		log.Printf("Ошибка сохранения пути к изображению в базе данных: %v", err)
+		log.Printf("Error saving the path to an image in database: %v", err)
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
@@ -296,14 +296,14 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 
 func HandleChangeBio(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method not supported")
 		return
 	}
 
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
-		log.Printf("Ошибка при GetUserIDFromSession HandleChangeBio: %v", err)
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
+		log.Printf("Error when GetUserIDFromSession HandleChangeBio: %v", err)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
 		return
 	}
 

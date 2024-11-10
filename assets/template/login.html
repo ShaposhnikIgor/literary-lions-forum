@@ -11,27 +11,34 @@
 <body>
     {{template "header" .}}
 
-<div class="container">
-    <h2>Login</h2>
-
-    <!-- Блок для отображения ошибки -->
-    {{if .Error}}
-    <div class="error">{{.Error}}</div>
-    {{end}}
-
-    <form class="login-form" action="/login" method="POST">
-        <label for="username">User name:</label>
-        <input type="text" id="username or email" name="username or email" placeholder="Enter user name" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="Enter password" required>
-
-        <input type="submit" value="Login">
-    </form>
-</div>
-<footer>
-    <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
-</footer>
+    <div class="page-container">
+        <div class="container">
+            <h2>Login</h2>
+        
+            <!-- Error message block -->
+            {{if .Error}}
+            <div class="error">{{.Error}}</div>
+            {{end}}
+        
+            <!-- Form with frame -->
+            <div class="login-form-container">
+                <form class="login-form" action="/login" method="POST">
+                    <label for="username">User name:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter user name" required>
+        
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+        
+                    <input type="submit" value="Login">
+                </form>
+            </div>
+        </div>
+        
+        <!-- Footer at the bottom of the page -->
+        <footer>
+            <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
+        </footer>
+    </div>
 </body>
 </html>
 {{end}}

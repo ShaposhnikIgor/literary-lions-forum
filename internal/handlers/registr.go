@@ -33,19 +33,19 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		// Validate CAPTCHA
 		captchaValid, err := validateCaptcha(r, captchaInput)
 		if err != nil {
-			errorMessage = "Ошибка обработки капчи"
+			errorMessage = "Error parsing captcha"
 			serveRegistrationPage(w, r, db, errorMessage)
 			return
 		}
 		if !captchaValid {
-			errorMessage = "Неправильный ответ на капчу"
+			errorMessage = "Incorrect respond to captcha"
 			serveRegistrationPage(w, r, db, errorMessage)
 			return
 		}
 
 		// Check if passwords match
 		if password != confirmPassword {
-			errorMessage = "Пароли не совпадают"
+			errorMessage = "Passwords don't match"
 			serveRegistrationPage(w, r, db, errorMessage)
 			return
 		}
@@ -54,12 +54,12 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var existingUserID int
 		err = db.QueryRow("SELECT id FROM users WHERE username = ? OR email = ?", username, email).Scan(&existingUserID)
 		if err != nil && err != sql.ErrNoRows {
-			log.Printf("Ошибка при проверке существующего пользователя: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка базы данных")
+			log.Printf("Error checking existed password: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Database error")
 			return
 		}
 		if existingUserID != 0 {
-			errorMessage = "Пользователь с таким именем пользователя или адресом электронной почты уже существует"
+			errorMessage = "User with this user name or email is already existed"
 			serveRegistrationPage(w, r, db, errorMessage)
 			return
 		}
@@ -67,37 +67,37 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		// Hash password
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка хеширования пароля")
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error of password hashing")
 			return
 		}
 
 		// Insert user into database
 		result, err := db.Exec("INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)", username, hashedPassword, email)
 		if err != nil {
-			log.Printf("Ошибка при вставке пользователя: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка базы данных")
+			log.Printf("Error getting the user: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Database error")
 			return
 		}
 
 		userID, err := result.LastInsertId()
 		if err != nil {
-			log.Printf("Ошибка получения ID пользователя: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка базы данных")
+			log.Printf("Error getting user's ID: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Database error")
 			return
 		}
 
 		// Create session token
 		sessionToken, err := utils.CreateSessionToken()
 		if err != nil {
-			log.Printf("Ошибка при создании токена сессии: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка создания сессии")
+			log.Printf("Error creating token session: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error creating session")
 			return
 		}
 
 		_, err = db.Exec("INSERT INTO sessions (user_id, session_token, created_at) VALUES (?, ?, ?)", userID, sessionToken, time.Now())
 		if err != nil {
-			log.Printf("Ошибка при создании токена сессии: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка создания сессии")
+			log.Printf("Error creating token session: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error creating session")
 			return
 		}
 
@@ -121,8 +121,8 @@ func serveRegistrationPage(w http.ResponseWriter, r *http.Request, db *sql.DB, e
 
 	captchaJSON, err := json.Marshal(captcha)
 	if err != nil {
-		log.Printf("Ошибка сериализации капчи: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка генерации капчи")
+		log.Printf("Error generating captcha: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error generating captcha")
 		return
 	}
 
@@ -142,15 +142,15 @@ func serveRegistrationPage(w http.ResponseWriter, r *http.Request, db *sql.DB, e
 			user = &models.User{}
 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
 			if err != nil {
-				log.Printf("Ошибка при получении пользователя: %v", err)
+				log.Printf("Error getting the user: %v", err)
 			}
 		}
 	}
 
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		log.Printf("Ошибка загрузки категорий: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 		return
 	}
 	defer rowsCategory.Close()
@@ -159,8 +159,8 @@ func serveRegistrationPage(w http.ResponseWriter, r *http.Request, db *sql.DB, e
 	for rowsCategory.Next() {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
-			log.Printf("Ошибка при чтении категории: %v", err)
-			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
 			return
 		}
 		categories = append(categories, category)
@@ -175,34 +175,34 @@ func serveRegistrationPage(w http.ResponseWriter, r *http.Request, db *sql.DB, e
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/register.html")
 	if err != nil {
-		log.Printf("Ошибка загрузки шаблона: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
+		log.Printf("Error loading template: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/html")
 	if err = tmpl.ExecuteTemplate(w, "register", pageData); err != nil {
-		log.Printf("Ошибка рендеринга: %v", err)
-		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
+		log.Printf("Rendering error: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Rendering page error")
 	}
 }
 
 func validateCaptcha(r *http.Request, captchaInput string) (bool, error) {
 	cookie, err := r.Cookie("captcha_answer")
 	if err != nil {
-		return false, fmt.Errorf("капча отсутствует или истек срок действия")
+		return false, fmt.Errorf(" Captcha expired or is not existed")
 	}
 
 	captchaJSON, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		log.Printf("Ошибка декодирования капчи: %v", err)
-		return false, fmt.Errorf("ошибка декодирования капчи")
+		log.Printf("Error decoding captcha: %v", err)
+		return false, fmt.Errorf("error decoding captcha")
 	}
 
 	var captcha utils.Captcha
 	if err := json.Unmarshal(captchaJSON, &captcha); err != nil {
-		log.Printf("Ошибка десериализации капчи: %v", err)
-		return false, fmt.Errorf("oшибка десериализации капчи")
+		log.Printf("Error of deserialization of captcha: %v", err)
+		return false, fmt.Errorf("error of deserialization of captcha")
 	}
 
 	return utils.VerifyCaptcha(captchaInput, captcha), nil

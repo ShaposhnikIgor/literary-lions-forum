@@ -2,12 +2,12 @@
 <div class="header">
     <nav class="navbar">
         <a class="logo-link" href="/">
-            <img src="/assets/static/images/logo.png" alt="Логотип Literary Lions" class="logo">
+            <img src="/assets/static/images/logo.png" alt="Logo Literary Lions" class="logo">
         </a>
         <a href="/all_posts">All Posts</a>
         <a href="/categories">Categories</a>
         <form action="/search" method="GET" class="search-form">
-            <input type="text" name="query" placeholder="Поиск по форуму..." required>
+            <input type="text" name="query" placeholder="Search..." required>
             <select name="category">
                 <option value="">Choose category</option>
                 {{range .Categories}}
