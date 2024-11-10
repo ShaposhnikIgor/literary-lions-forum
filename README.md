@@ -66,4 +66,3 @@ To get the Literary Lions Forum running locally or in a Docker container, follow
     Navigate to http://localhost:8080
 
 # 📚 Happy reading and connecting at the Literary Lions Forum! 🦁
-
