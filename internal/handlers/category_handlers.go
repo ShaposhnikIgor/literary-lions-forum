@@ -10,7 +10,7 @@ import (
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
@@ -18,7 +18,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query("SELECT id, name, description, created_at FROM categories ORDER BY created_at DESC")
 	if err != nil {
 		log.Printf("Ошибка при получении категорий: %v", err)
-		http.Error(w, "Ошибка при загрузке категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке категорий")
 		return
 	}
 	defer rows.Close()
@@ -28,7 +28,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var category models.Category
 		if err := rows.Scan(&category.ID, &category.Name, &category.Description, &category.CreatedAt); err != nil {
 			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка при загрузке категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке категорий")
 			return
 		}
 		categories = append(categories, category)
@@ -36,7 +36,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Ошибка при обработке результата: %v", err)
-		http.Error(w, "Ошибка при загрузке категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке категорий")
 		return
 	}
 
@@ -68,7 +68,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/categories.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
-		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 		return
 	}
 
@@ -77,7 +77,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "categories", pageData)
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 		return
 	}
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	//"fmt"
 	models "literary-lions/internal/models"
 	"log"
 	"net/http"
@@ -11,14 +10,12 @@ import (
 
 func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-		http.Redirect(w, r, "/error", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
 	if r.URL.Path != "/" {
-		http.Error(w, "Страница не найдена", http.StatusNotFound)
-		http.Redirect(w, r, "/error", http.StatusNotFound)
+		RenderErrorPage(w, r, db, http.StatusNotFound, "Страница не найдена")
 		return
 	}
 
@@ -26,7 +23,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query("SELECT id, title FROM posts ORDER BY created_at DESC LIMIT 10")
 	if err != nil {
 		log.Printf("Ошибка при Получение постов из базы данных: %v", err) // Логирование детали ошибки
-		http.Error(w, "Ошибка базы данных", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка базы данных")
 		return
 	}
 	defer rows.Close()
@@ -35,14 +32,14 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.Title); err != nil {
-			http.Error(w, "Ошибка при чтении данных", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при чтении данных")
 			return
 		}
 		posts = append(posts, post)
 	}
 
 	if err := rows.Err(); err != nil {
-		http.Error(w, "Ошибка при обработке запроса", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при обработке запроса")
 		return
 	}
 
@@ -65,7 +62,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
 		log.Printf("Ошибка загрузки категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 	defer rowsCategory.Close()
@@ -75,7 +72,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
 			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 		categories = append(categories, category)
@@ -83,7 +80,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rowsCategory.Err(); err != nil {
 		log.Printf("Ошибка при обработке категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 
@@ -97,7 +94,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/index.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
-		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 		return
 	}
 
@@ -108,7 +105,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "index", pageData) // specify "index" here
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 		return
 	}
 }

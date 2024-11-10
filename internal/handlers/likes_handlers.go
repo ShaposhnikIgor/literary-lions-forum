@@ -12,99 +12,16 @@ import (
 	"time"
 )
 
-// func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-// 	if r.Method != http.MethodPost {
-// 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	// Extract the target ID and type from the URL path
-// 	parts := strings.Split(r.URL.Path, "/")
-// 	if len(parts) < 3 {
-// 		http.Error(w, "Invalid URL", http.StatusBadRequest)
-// 		return
-// 	}
-// 	targetIDStr := parts[2] // This should be the ID of the target (post or comment)
-
-// 	// Parse form values
-// 	//targetIDStr := r.FormValue("target_id")
-// 	targetType := r.FormValue("target_type") // "post" or "comment"
-// 	isLikeStr := r.FormValue("is_like")      // "true" or "false"
-
-// 	// Validate input
-// 	targetID, err := strconv.Atoi(targetIDStr)
-// 	if err != nil || (targetType != "post" && targetType != "comment") {
-// 		http.Error(w, "Некорректные данные", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	isLike := isLikeStr == "true" // interpret "true" as like, otherwise dislike
-
-// 	// Get user ID from session
-// 	var userID int
-// 	cookie, err := r.Cookie("session_token")
-// 	if err == nil {
-// 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
-// 		if err != nil {
-// 			http.Error(w, "Ошибка аутентификации", http.StatusUnauthorized)
-// 			return
-// 		}
-// 	} else {
-// 		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	// Check if a like/dislike already exists for this target by the user
-// 	var existingID int
-// 	err = db.QueryRow(`
-// 		SELECT id FROM likes_dislikes
-// 		WHERE user_id = ? AND target_id = ? AND target_type = ?
-// 	`, userID, targetID, targetType).Scan(&existingID)
-
-// 	if err == sql.ErrNoRows {
-// 		// If no existing entry, insert a new like/dislike
-// 		_, err = db.Exec(`
-// 			INSERT INTO likes_dislikes (user_id, target_id, target_type, is_like, created_at)
-// 			VALUES (?, ?, ?, ?, ?)
-// 		`, userID, targetID, targetType, isLike, time.Now())
-// 		if err != nil {
-// 			log.Printf("Ошибка при добавлении like/dislike: %v", err)
-// 			http.Error(w, "Ошибка при добавлении like/dislike", http.StatusInternalServerError)
-// 			return
-// 		}
-// 	} else if err == nil {
-// 		// If an entry exists, update it with the new like/dislike value
-// 		_, err = db.Exec(`
-// 			UPDATE likes_dislikes
-// 			SET is_like = ?, created_at = ?
-// 			WHERE id = ?
-// 		`, isLike, time.Now(), existingID)
-// 		if err != nil {
-// 			log.Printf("Ошибка при обновлении like/dislike: %v", err)
-// 			http.Error(w, "Ошибка при обновлении like/dislike", http.StatusInternalServerError)
-// 			return
-// 		}
-// 	} else {
-// 		log.Printf("Ошибка при проверке существующего like/dislike: %v", err)
-// 		http.Error(w, "Ошибка при проверке like/dislike", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Return success response
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write([]byte("Успешно обновлено"))
-// }
-
 func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Метод не поддерживается like", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается like")
 		return
 	}
 
 	// Extract the comment ID from the URL path (e.g., /comment_like/{id})
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) < 3 {
-		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid URL")
 		return
 	}
 	targetIDStr := parts[2] // This should be the ID of the comment
@@ -116,7 +33,7 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Validate input
 	targetID, err := strconv.Atoi(targetIDStr)
 	if err != nil || (targetType != "post" && targetType != "comment") {
-		http.Error(w, "Некорректные данные", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Некорректные данные")
 		return
 	}
 
@@ -128,11 +45,11 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err == nil {
 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
 		if err != nil {
-			http.Error(w, "Ошибка аутентификации", http.StatusUnauthorized)
+			RenderErrorPage(w, r, db, http.StatusUnauthorized, "Ошибка аутентификации")
 			return
 		}
 	} else {
-		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "ользователь не авторизован")
 		return
 	}
 
@@ -151,7 +68,7 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         `, userID, targetID, targetType, isLike, time.Now())
 		if err != nil {
 			log.Printf("Ошибка при добавлении like/dislike: %v", err)
-			http.Error(w, "Ошибка при добавлении like/dislike", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при добавлении like/dislike")
 			return
 		}
 	} else if err == nil {
@@ -163,12 +80,12 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         `, isLike, time.Now(), existingID)
 		if err != nil {
 			log.Printf("Ошибка при обновлении like/dislike: %v", err)
-			http.Error(w, "Ошибка при обновлении like/dislike", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при обновлении like/dislike")
 			return
 		}
 	} else {
 		log.Printf("Ошибка при проверке существующего like/dislike: %v", err)
-		http.Error(w, "Ошибка при проверке like/dislike", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при проверке like/dislike")
 		return
 	}
 
@@ -177,75 +94,23 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Write([]byte("Успешно обновлено"))
 }
 
-// // Update this to handle both GET and POST for the comment like/dislike
-// func CommentLikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-// 	if r.Method != http.MethodPost {
-// 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	// Extract comment ID from the URL
-// 	pathParts := strings.Split(r.URL.Path, "/")
-// 	if len(pathParts) < 3 || pathParts[1] != "comment_like" {
-// 		http.Error(w, "Страница не найдена", http.StatusNotFound)
-// 		return
-// 	}
-
-// 	commentID, err := strconv.Atoi(pathParts[2])
-// 	if err != nil {
-// 		http.Error(w, "Неверный ID комментария", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Get user info (assuming user is already logged in through session)
-// 	var user *models.User
-// 	cookie, err := r.Cookie("session_token")
-// 	if err == nil {
-// 		var userID int
-// 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
-// 		if err == nil {
-// 			user = &models.User{}
-// 			err = db.QueryRow("SELECT id, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username)
-// 			if err != nil {
-// 				log.Printf("Ошибка при получении пользователя: %v", err)
-// 			}
-// 		}
-// 	}
-
-// 	// Handle like/dislike
-// 	isLike := r.FormValue("is_like") == "true"
-// 	_, err = db.Exec(`
-//     INSERT OR REPLACE INTO likes_dislikes (user_id, target_id, target_type, is_like, created_at)
-//     VALUES (?, ?, ?, ?, ?)`,
-// 		user.ID, commentID, "comment", isLike, time.Now())
-// 	if err != nil {
-// 		log.Printf("Ошибка при добавлении/обновлении like/dislike для комментария: %v", err)
-// 		http.Error(w, "Ошибка при обновлении like/dislike", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// After processing the like/dislike, redirect back to the post page
-// 	// Redirect to the post page with updated comment counts
-// 	http.Redirect(w, r, fmt.Sprintf("/post/%d", r.FormValue("post_id")), http.StatusSeeOther)
-// }
-
 // Update this to handle both GET and POST for the comment like/dislike
 func CommentLikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
 	// Extract comment ID from the URL
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) < 3 || pathParts[1] != "comment_like" {
-		http.Error(w, "Страница не найдена", http.StatusNotFound)
+		RenderErrorPage(w, r, db, http.StatusNotFound, "Страница не найдена")
 		return
 	}
 
 	commentID, err := strconv.Atoi(pathParts[2])
 	if err != nil {
-		http.Error(w, "Неверный ID комментария", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Неверный ID комментария")
 		return
 	}
 
@@ -272,14 +137,14 @@ func CommentLikeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		user.ID, commentID, "comment", isLike, time.Now())
 	if err != nil {
 		log.Printf("Ошибка при добавлении/обновлении like/dislike для комментария: %v", err)
-		http.Error(w, "Ошибка при обновлении like/dislike", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при обновлении like/dislike")
 		return
 	}
 
 	// After processing the like/dislike, redirect back to the post page
 	postID := r.FormValue("post_id")
 	if postID == "" {
-		http.Error(w, "ID поста не найден", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "ID поста не найден")
 		return
 	}
 
@@ -312,7 +177,7 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userIDStr := r.URL.Query().Get("user_id")
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
@@ -340,7 +205,7 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	`, userID)
 	if err != nil {
 		log.Printf("Error fetching user's likes: %v", err)
-		http.Error(w, "Error loading likes", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading likes")
 		return
 	}
 	defer rows.Close()
@@ -349,7 +214,7 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var like models.LikeDislike
 		if err := rows.Scan(&like.TargetID, &like.TargetType, &like.IsLike); err != nil {
 			log.Printf("Error reading like: %v", err)
-			http.Error(w, "Error loading likes", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading likes")
 			return
 		}
 		likes = append(likes, like)
@@ -357,7 +222,7 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Error processing likes result: %v", err)
-		http.Error(w, "Error loading likes", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading likes")
 		return
 	}
 
@@ -375,7 +240,7 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user_likes.html")
 	if err != nil {
 		log.Printf("Error loading template: %v", err)
-		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading template")
 		return
 	}
 
@@ -383,6 +248,6 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "user_likes", pageData)
 	if err != nil {
 		log.Printf("Error rendering template: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error rendering page")
 	}
 }

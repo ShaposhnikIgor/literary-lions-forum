@@ -14,27 +14,25 @@ import (
 
 func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
-		http.Error(w, "Метод не поддерживается aaaaaaaaaa", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
 	// Extract post ID from the URL path
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) < 3 || pathParts[1] != "post" {
-		http.Error(w, "Страница не найдена", http.StatusNotFound)
-		http.Redirect(w, r, "/error", http.StatusNotFound)
+		RenderErrorPage(w, r, db, http.StatusNotFound, "Страница не найдена")
 		return
 	}
 
 	postID, err := strconv.Atoi(pathParts[2])
 	if err != nil {
-		http.Error(w, "Неверный ID поста", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Неверный ID поста")
 		return
 	}
 
 	var author string
 	var categoryName string
-	// Modified query to join with users and categories tables
 	var post models.Post
 	query := `
 		SELECT p.id, p.user_id, u.username, p.title, p.body, p.category_id, c.name AS category_name, p.created_at
@@ -48,10 +46,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Пост не найден", http.StatusNotFound)
+			RenderErrorPage(w, r, db, http.StatusNotFound, "Пост не найден")
 		} else {
 			log.Printf("Ошибка при извлечении поста: %v", err)
-			http.Error(w, "Ошибка при загрузке поста", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке поста")
 		}
 		return
 	}
@@ -73,7 +71,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// Handling like/dislike for the post
 	if r.Method == http.MethodPost {
-		//targetID := r.FormValue("target_id")
 		targetType := r.FormValue("target_type")
 		isLike := r.FormValue("is_like") == "true"
 
@@ -121,7 +118,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query(commentQuery, postID)
 	if err != nil {
 		log.Printf("Ошибка при извлечении комментариев: %v", err)
-		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке комментариев")
 		return
 	}
 	defer rows.Close()
@@ -130,7 +127,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var comment models.Comment
 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Username, &comment.Body, &comment.CreatedAt); err != nil {
 			log.Printf("Ошибка при чтении комментария: %v", err)
-			http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке комментариев")
 			return
 		}
 		comments = append(comments, comment)
@@ -169,7 +166,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
 		log.Printf("Ошибка загрузки категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 	defer rowsCategory.Close()
@@ -179,7 +176,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
 			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 		categories = append(categories, category)
@@ -187,7 +184,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rowsCategory.Err(); err != nil {
 		log.Printf("Ошибка при обработке категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 
@@ -207,7 +204,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/post.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
-		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 		return
 	}
 
@@ -215,14 +212,14 @@ func PostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "post", pageData)
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 		return
 	}
 }
 
 func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
@@ -237,28 +234,28 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if categoryIDStr != "" {
 		categoryID, errCategory = strconv.Atoi(categoryIDStr)
 		if errCategory != nil {
-			http.Error(w, "Invalid category ID", http.StatusBadRequest)
+			RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid category ID")
 			return
 		}
 		// Проверка существования категории
 		var exists bool
 		err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)", categoryID).Scan(&exists)
 		if err != nil || !exists {
-			http.Error(w, "Категория не найдена", http.StatusNotFound)
+			RenderErrorPage(w, r, db, http.StatusNotFound, "Категория не найдена")
 			return
 		}
 	}
 	if userIDStr != "" {
 		userID, errUser = strconv.Atoi(userIDStr)
 		if errUser != nil {
-			http.Error(w, "Invalid user ID", http.StatusBadRequest)
+			RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid user ID")
 			return
 		}
 		// Проверка существования пользователя
 		var exists bool
 		err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)", userID).Scan(&exists)
 		if err != nil || !exists {
-			http.Error(w, "Пользователь не найден", http.StatusNotFound)
+			RenderErrorPage(w, r, db, http.StatusNotFound, "Пользователь не найден")
 			return
 		}
 	}
@@ -266,19 +263,6 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Determine query based on the provided parameters
 	var rows *sql.Rows
 	var err error
-	// if categoryIDStr != "" && userIDStr != "" {
-	// 	// Fetch posts by both category and user
-	// 	rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts WHERE category_id = ? AND user_id = ? ORDER BY created_at DESC", categoryID, userID)
-	// } else if categoryIDStr != "" {
-	// 	// Fetch posts by category
-	// 	rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts WHERE category_id = ? ORDER BY created_at DESC", categoryID)
-	// } else if userIDStr != "" {
-	// 	// Fetch posts by user
-	// 	rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts WHERE user_id = ? ORDER BY created_at DESC", userID)
-	// } else {
-	// 	// Fetch all posts if no filters are applied
-	// 	rows, err = db.Query("SELECT id, user_id, title, body, category_id, created_at FROM posts ORDER BY created_at DESC")
-	// }
 
 	if categoryIDStr != "" && userIDStr != "" {
 		// Fetch posts by both category and user, including the username and category name
@@ -323,26 +307,13 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err != nil {
 		log.Printf("Ошибка при получении постов: %v", err)
-		http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке постов")
 		return
 	}
 	defer rows.Close()
 
 	const limit = 200
 	var posts []models.Post
-
-	// Process each row
-	// for rows.Next() {
-	// 	var post models.Post
-	// 	if err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Body, &post.CategoryID, &post.CreatedAt); err != nil {
-	// 		log.Printf("Ошибка при чтении поста: %v", err)
-	// 		http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	// Truncate post body for summary display
-	// 	post.Body = truncate(post.Body, limit)
-	// 	posts = append(posts, post)
-	// }
 
 	for rows.Next() {
 		var post models.Post
@@ -351,10 +322,12 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			&post.ID, &post.UserID, &author, &post.Title, &post.Body, &post.CategoryID, &categoryName, &post.CreatedAt,
 		); err != nil {
 			log.Printf("Ошибка при извлечении данных поста: %v", err)
-			http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при при извлечении данных поста")
 			return
 		}
 
+		// Truncate post body for summary display
+		post.Body = truncate(post.Body, limit)
 		post.Author = author
 		post.CategoryName = categoryName
 		posts = append(posts, post)
@@ -362,7 +335,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Ошибка при обработке результата: %v", err)
-		http.Error(w, "Ошибка при загрузке постов", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке постов")
 		return
 	}
 
@@ -385,7 +358,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
 		log.Printf("Ошибка загрузки категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 	defer rowsCategory.Close()
@@ -395,7 +368,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
 			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 		categories = append(categories, category)
@@ -403,7 +376,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rowsCategory.Err(); err != nil {
 		log.Printf("Ошибка при обработке категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 
@@ -417,7 +390,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/all_posts.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
-		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 		return
 	}
 
@@ -426,7 +399,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "all_posts", pageData)
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 		return
 	}
 }
@@ -455,7 +428,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 				}
 			}
 		} else {
-			http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+			RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
 			return
 		}
 
@@ -463,7 +436,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		rows, err := db.Query("SELECT id, name FROM categories")
 		if err != nil {
 			log.Printf("Ошибка загрузки категорий: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 		defer rows.Close()
@@ -473,7 +446,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			var category models.Category
 			if err := rows.Scan(&category.ID, &category.Name); err != nil {
 				log.Printf("Ошибка при чтении категории: %v", err)
-				http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+				RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 				return
 			}
 			categories = append(categories, category)
@@ -481,7 +454,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 		if err := rows.Err(); err != nil {
 			log.Printf("Ошибка при обработке категорий: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 
@@ -494,7 +467,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/new_post.html")
 		if err != nil {
 			log.Printf("Ошибка загрузки шаблона: %v", err)
-			http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 			return
 		}
 
@@ -503,7 +476,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		err = tmpl.ExecuteTemplate(w, "new_post", pageData)
 		if err != nil {
 			log.Printf("Ошибка рендеринга: %v", err)
-			http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 			return
 		}
 		return
@@ -513,21 +486,21 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		// Check if the user is logged in
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
-			http.Error(w, "Требуется авторизация", http.StatusUnauthorized)
+			RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
 			return
 		}
 
 		var userID int
 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
 		if err != nil {
-			http.Error(w, "Ошибка при проверке сессии", http.StatusUnauthorized)
+			RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
 			return
 		}
 
 		// Parse form data
 		err = r.ParseForm()
 		if err != nil {
-			http.Error(w, "Ошибка обработки формы", http.StatusBadRequest)
+			RenderErrorPage(w, r, db, http.StatusBadRequest, "Ошибка обработки формы")
 			return
 		}
 
@@ -536,26 +509,26 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		categoryIDStr := r.FormValue("category_id")
 
 		if title == "" || body == "" {
-			http.Error(w, "Все поля должны быть заполнены", http.StatusBadRequest)
+			RenderErrorPage(w, r, db, http.StatusNotFound, "Все поля должны быть заполнены")
 			return
 		}
 
 		categoryID, err := strconv.Atoi(categoryIDStr)
 		if err != nil {
-			http.Error(w, "Неверный ID категории", http.StatusBadRequest)
+			RenderErrorPage(w, r, db, http.StatusNotFound, "Неверный ID категории")
 			return
 		}
 
 		result, err := db.Exec("INSERT INTO posts (user_id, title, body, category_id, created_at) VALUES (?, ?, ?, ?, ?)", userID, title, body, categoryID, time.Now())
 		if err != nil {
 			log.Printf("Ошибка при создании поста: %v", err)
-			http.Error(w, "Ошибка при создании поста", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при создании поста")
 			return
 		}
 
 		postID, err := result.LastInsertId()
 		if err != nil {
-			http.Error(w, "Ошибка получения ID поста", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка получения ID поста")
 			return
 		}
 

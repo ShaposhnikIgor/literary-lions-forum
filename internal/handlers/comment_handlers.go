@@ -13,7 +13,7 @@ import (
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
@@ -23,13 +23,13 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// Проверка на валидность данных
 	if postIDStr == "" || body == "" {
-		http.Error(w, "Недостаточно данных", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Недостаточно данных")
 		return
 	}
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
-		http.Error(w, "Некорректный идентификатор поста", http.StatusBadRequest)
+		RenderErrorPage(w, r, db, http.StatusBadRequest, "Некорректный идентификатор поста")
 		return
 	}
 
@@ -39,11 +39,11 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err == nil {
 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
 		if err != nil {
-			http.Error(w, "Ошибка аутентификации", http.StatusUnauthorized)
+			RenderErrorPage(w, r, db, http.StatusUnauthorized, "Ошибка аутентификации")
 			return
 		}
 	} else {
-		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
 		return
 	}
 
@@ -51,7 +51,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	_, err = db.Exec("INSERT INTO comments (post_id, user_id, body, created_at) VALUES (?, ?, ?, ?)", postID, userID, body, time.Now())
 	if err != nil {
 		log.Printf("Ошибка при добавлении комментария: %v", err)
-		http.Error(w, "Ошибка при добавлении комментария", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при добавлении комментария")
 		return
 	}
 
@@ -61,17 +61,16 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		RenderErrorPage(w, r, db, http.StatusMethodNotAllowed, "Метод не поддерживается")
 		return
 	}
 
-	// // Проверка на наличие сессии пользователя
+	// // Проверка на наличие сессии RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при добавлении комментария")пользователя
 	var userID int
 	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
-		//var userID int
 		err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
 		if err == nil {
 			user = &models.User{}
@@ -81,7 +80,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			}
 		}
 	} else {
-		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "Пользователь не авторизован")
 		return
 	}
 
@@ -94,7 +93,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		ORDER BY c.created_at DESC`, userID)
 	if err != nil {
 		log.Printf("Ошибка при извлечении комментариев: %v", err)
-		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке комментариев")
 		return
 	}
 	defer rows.Close()
@@ -104,7 +103,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var comment models.Comment
 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Body, &comment.CreatedAt, &comment.Title); err != nil {
 			log.Printf("Ошибка при чтении комментария: %v", err)
-			http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке комментариев")
 			return
 		}
 		comments = append(comments, comment)
@@ -112,7 +111,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Ошибка при обработке результатов комментариев: %v", err)
-		http.Error(w, "Ошибка при загрузке комментариев", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при загрузке комментариев")
 		return
 	}
 
@@ -120,7 +119,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
 		log.Printf("Ошибка загрузки категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 	defer rowsCategory.Close()
@@ -130,7 +129,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var category models.Category
 		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
 			log.Printf("Ошибка при чтении категории: %v", err)
-			http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 			return
 		}
 		categories = append(categories, category)
@@ -138,7 +137,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	if err := rowsCategory.Err(); err != nil {
 		log.Printf("Ошибка при обработке категорий: %v", err)
-		http.Error(w, "Ошибка загрузки категорий", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки категорий")
 		return
 	}
 
@@ -152,7 +151,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user_comments.html")
 	if err != nil {
 		log.Printf("Ошибка загрузки шаблона: %v", err)
-		http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка загрузки шаблона")
 		return
 	}
 
@@ -160,7 +159,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = tmpl.ExecuteTemplate(w, "user_comments", pageData)
 	if err != nil {
 		log.Printf("Ошибка рендеринга: %v", err)
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка рендеринга страницы")
 		return
 	}
 }

@@ -65,18 +65,6 @@ func hashAnswer(answer string) string {
 }
 
 // Проверка капчи
-// func VerifyCaptcha(input string, captcha Captcha) bool {
-// 	// Проверяем срок действия капчи
-// 	if time.Now().After(captcha.ExpiresAt) {
-// 		fmt.Println("Captcha expired")
-// 		return false
-// 	}
-
-// 	// Проверяем хеш ответа
-// 	return hashAnswer(input) == captcha.Answer
-// }
-
-// Проверка капчи
 func VerifyCaptcha(input string, captcha Captcha) bool {
 	// Проверяем срок действия капчи
 	if time.Now().After(captcha.ExpiresAt) {
@@ -87,21 +75,3 @@ func VerifyCaptcha(input string, captcha Captcha) bool {
 	// Проверяем хеш ответа
 	return hashAnswer(input) == captcha.Answer
 }
-
-// func main() {
-// 	// Генерация капчи
-// 	captcha := GenerateCaptcha()
-// 	fmt.Println("Captcha Question:", captcha.Question)
-
-// 	// Пользовательский ввод
-// 	var input string
-// 	fmt.Print("Введите ответ: ")
-// 	fmt.Scanln(&input)
-
-// 	// Проверка капчи
-// 	if VerifyCaptcha(input, captcha) {
-// 		fmt.Println("Капча пройдена!")
-// 	} else {
-// 		fmt.Println("Неверный ответ или срок капчи истек.")
-// 	}
-// }

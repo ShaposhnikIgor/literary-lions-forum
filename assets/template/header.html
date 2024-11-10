@@ -1,8 +1,5 @@
 {{define "header"}}
 <div class="header">
-    <!-- <a href="/">
-        <img src="/static/images/logo.png" alt="Логотип Literary Lions" class="logo">
-    </a> -->
     <nav class="navbar">
         <a class="logo-link" href="/">
             <img src="/assets/static/images/logo.png" alt="Логотип Literary Lions" class="logo">
@@ -26,31 +23,5 @@
                 <a href="/login">Login</a> | <a href="/register">Register</a>
             {{end}}        
     </nav>
-
-
-    <!-- <nav class="navbar">
-        <ul>
-            {{if .User}}
-                <li><a href="/user">{{.User.Username}}</a></li>
-                <li><a href="/logout">Logout</a></li>
-                <li><a href="/new-post">Add post</a></li>
-            {{else}}
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Registration</a></li>
-            {{end}}
-            <li><a href="/all_posts">Posts</a></li>
-            <li><a href="/categories">Categories</a></li>
-        </ul>
-    </nav>
-    <form action="/search" method="GET" class="search-form">
-        <input type="text" name="query" placeholder="Поиск по форуму..." required>
-        <select name="category">
-            <option value="">Choose category</option>
-            {{range .Categories}}
-                <option value="{{.ID}}">{{.Name}}</option>
-            {{end}}
-        </select>
-        <button type="submit">🔍</button>
-    </form> -->
 </div>
 {{end}}

@@ -15,7 +15,6 @@ type User struct {
 	CreatedAt    time.Time `db:"created_at"`
 	Bio          *string   `db:"bio"`
 	ProfImage    *string   `db:"profile_image"`
-	// Salt    	 string			`db:"salt"'
 }
 
 // Category - структура для представления категорий
@@ -97,6 +96,13 @@ type LoginPageData struct {
 	Error      string
 	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
 	Categories []Category
+}
+
+type ErrorPageData struct {
+	ErrorTitle   string
+	ErrorMessage string
+	User         *User
+	Categories   []Category
 }
 
 type RegisterPageData struct {
