@@ -19,7 +19,6 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получение постов из базы данных
 	rows, err := db.Query("SELECT id, title FROM posts ORDER BY created_at DESC LIMIT 10")
 	if err != nil {
 		log.Printf("Error gettingposts from database: %v", err) // Логирование детали ошибки
@@ -43,7 +42,6 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -84,10 +82,9 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Создаем структуру для передачи в шаблон
 	pageData := models.IndexPageData{
 		Posts:      posts,
-		User:       user, // может быть nil, если пользователь не залогинен
+		User:       user,
 		Categories: categories,
 	}
 

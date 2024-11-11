@@ -8,14 +8,12 @@ import (
 	"time"
 )
 
-// Структура для хранения капчи
 type Captcha struct {
 	Question  string
 	Answer    string
 	ExpiresAt time.Time
 }
 
-// Генерация случайного математического выражения
 func GenerateCaptcha() Captcha {
 	rand.Seed(time.Now().UnixNano())
 	var a, b, result int
@@ -50,7 +48,6 @@ func GenerateCaptcha() Captcha {
 	question := fmt.Sprintf("%d %s %d = ?", a, op, b)
 	hashedAnswer := hashAnswer(fmt.Sprintf("%d", result))
 
-	// Капча с хешированным ответом и временем жизни (например, 1 минута)
 	return Captcha{
 		Question:  question,
 		Answer:    hashedAnswer,
@@ -58,20 +55,17 @@ func GenerateCaptcha() Captcha {
 	}
 }
 
-// Хеширование ответа
 func hashAnswer(answer string) string {
 	hash := sha256.Sum256([]byte(answer))
 	return hex.EncodeToString(hash[:])
 }
 
-// Проверка капчи
 func VerifyCaptcha(input string, captcha Captcha) bool {
-	// Проверяем срок действия капчи
+
 	if time.Now().After(captcha.ExpiresAt) {
 		fmt.Println("Captcha expired")
 		return false
 	}
 
-	// Проверяем хеш ответа
 	return hashAnswer(input) == captcha.Answer
 }

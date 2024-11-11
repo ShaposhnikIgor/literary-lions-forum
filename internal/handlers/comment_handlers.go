@@ -17,11 +17,11 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Извлечение данных из формы
+	// Extract form data
 	postIDStr := r.FormValue("post_id")
 	body := r.FormValue("body")
 
-	// Проверка на валидность данных
+	// Validate data
 	if postIDStr == "" || body == "" {
 		RenderErrorPage(w, r, db, http.StatusBadRequest, "Not enough data")
 		return
@@ -33,7 +33,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получение идентификатора пользователя из сессии
+	// Get user ID from session
 	var userID int
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -43,11 +43,11 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			return
 		}
 	} else {
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorized")
 		return
 	}
 
-	// Вставка комментария в базу данных
+	// Insert comment into the database
 	_, err = db.Exec("INSERT INTO comments (post_id, user_id, body, created_at) VALUES (?, ?, ?, ?)", postID, userID, body, time.Now())
 	if err != nil {
 		log.Printf("Error when adding the comment: %v", err)
@@ -55,7 +55,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Перенаправление обратно на страницу поста
+	// Redirect back to the post page
 	http.Redirect(w, r, fmt.Sprintf("/post/%d", postID), http.StatusSeeOther)
 }
 
@@ -65,9 +65,8 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// // Проверка на наличие сессии RenderErrorPage(w, r, db, http.StatusInternalServerError, "Ошибка при добавлении комментария")пользователя
+	// Check if the user session exists
 	var userID int
-	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -80,11 +79,11 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			}
 		}
 	} else {
-		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorised")
+		RenderErrorPage(w, r, db, http.StatusUnauthorized, "User is not authorized")
 		return
 	}
 
-	// Извлекаем комментарии пользователя с заголовками постов
+	// Retrieve user comments with post titles
 	rows, err := db.Query(`
 		SELECT c.id, c.post_id, c.user_id, c.body, c.created_at, p.title 
 		FROM comments c 
@@ -141,7 +140,7 @@ func UserCommentsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Передача данных в шаблон
+	// Pass data to the template
 	pageData := models.UserCommentsPageData{
 		User:       user,
 		Comments:   comments,

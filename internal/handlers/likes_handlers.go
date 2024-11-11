@@ -181,7 +181,6 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {

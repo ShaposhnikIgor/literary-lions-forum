@@ -56,11 +56,11 @@ To get the Literary Lions Forum running locally or in a Docker container, follow
     ```
 2. **Run the Docker Container**:
     ```bash
-    docker build -t literary-lions .
+   docker build -t literary-jo .
     ```
 3. **Build the Docker Image**:
     ```bash
-    docker run -p 8080:8080 literary-lions
+    docker run -p 8080:8080 --name literary-jo-container literary-jo
     ```
 4. **Open in Browser**:
     Navigate to http://localhost:8080

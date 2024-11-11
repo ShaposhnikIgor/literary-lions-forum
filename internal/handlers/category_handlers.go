@@ -14,7 +14,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получение всех категорий из базы данных
+	// Retrieve all categories from the database
 	rows, err := db.Query("SELECT id, name, description, created_at FROM categories ORDER BY created_at DESC")
 	if err != nil {
 		log.Printf("Error getting the category: %v", err)
@@ -40,7 +40,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
+	// Check if a user session exists
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -55,16 +55,16 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 	}
 
-	// Создаем структуру для передачи в шаблон
+	// Create a structure to pass to the template
 	pageData := struct {
 		Categories []models.Category
-		User       *models.User // может быть nil, если пользователь не залогинен
+		User       *models.User // may be nil if the user is not logged in
 	}{
 		Categories: categories,
 		User:       user,
 	}
 
-	// Парсинг и рендеринг шаблона
+	// Parse and render the template
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/categories.html")
 	if err != nil {
 		log.Printf("Error loading template: %v", err)

@@ -15,17 +15,16 @@ import (
 )
 
 func GetUserIDFromSession(r *http.Request, db *sql.DB) (int, error) {
-	// Получаем куки с токеном сессии
+
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return 0, err // Ошибка: куки не найдены
+		return 0, err
 	}
 
-	// Извлекаем user_id по токену сессии из базы данных
 	var userID int
 	err = db.QueryRow("SELECT user_id FROM sessions WHERE session_token = ?", cookie.Value).Scan(&userID)
 	if err != nil {
-		return 0, err // Ошибка: токен не найден в сессиях
+		return 0, err
 	}
 
 	return userID, nil
@@ -37,7 +36,6 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -78,9 +76,8 @@ func HandleUserPage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	//Создаем структуру для передачи в шаблон
 	pageData := models.UserPageData{
-		User:       user, // может быть nil, если пользователь не залогинен
+		User:       user,
 		Categories: categories,
 	}
 
@@ -133,7 +130,6 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получение ID пользователя из сессии
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
 		log.Printf("Error when GetUserIDFromSession в HandleChangePassword: %v", err)
@@ -141,7 +137,6 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Чтение и проверка текущего пароля и нового пароля из формы
 	currentPassword := r.FormValue("current_password")
 	newPassword := r.FormValue("new_password")
 	confirmPassword := r.FormValue("confirm_password")
@@ -151,7 +146,6 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Извлечение хеша текущего пароля из базы данных для проверки
 	var passwordHash string
 	err = db.QueryRow("SELECT password_hash FROM users WHERE id = ?", userID).Scan(&passwordHash)
 	if err != nil {
@@ -160,21 +154,18 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка текущего пароля
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(currentPassword))
 	if err != nil {
 		RenderErrorPage(w, r, db, http.StatusBadRequest, "Incorrect current password")
 		return
 	}
 
-	// Хеширование нового пароля
 	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
-	// Обновление пароля в базе данных
 	_, err = db.Exec("UPDATE users SET password_hash = ? WHERE id = ?", newHashedPassword, userID)
 	if err != nil {
 		log.Printf("Error updating password: %v", err)
@@ -182,7 +173,6 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Перенаправление на страницу профиля после успешного обновления пароля
 	http.Redirect(w, r, "/user", http.StatusSeeOther)
 }
 
@@ -193,7 +183,6 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Извлечение пути к изображению из базы данных
 	var filePath string
 	err = db.QueryRow("SELECT COALESCE(profile_image, '') FROM users WHERE id = ?", userID).Scan(&filePath)
 	if err != nil {
@@ -202,7 +191,6 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Определение типа изображения по расширению файла
 	fileExt := filepath.Ext(filePath)
 	switch fileExt {
 	case ".jpg", ".jpeg":
@@ -216,7 +204,6 @@ func ServeProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Отправка файла
 	http.ServeFile(w, r, filePath)
 }
 
@@ -226,7 +213,6 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 		return
 	}
 
-	// Получение ID пользователя из сессии
 	userID, err := GetUserIDFromSession(r, db)
 	if err != nil {
 		log.Printf("Error getting ID of user from the session: %v", err)
@@ -234,7 +220,6 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 		return
 	}
 
-	// Получение текущего пути к изображению профиля из базы данных
 	var oldFilePath string
 	err = db.QueryRow("SELECT profile_image FROM users WHERE id = ?", userID).Scan(&oldFilePath)
 	if err != nil && err != sql.ErrNoRows {
@@ -248,7 +233,6 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 		oldFilePath = "assets/static/images/placeholder.png" // Default placeholder image
 	}
 
-	// Чтение файла из формы
 	file, header, err := r.FormFile("profile_image")
 	if err != nil {
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
@@ -256,17 +240,14 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 	}
 	defer file.Close()
 
-	// Создание пути для сохранения нового изображения
 	filePath := fmt.Sprintf("assets/static/images/uploads/%d_%s", userID, header.Filename)
 
-	// Удаление старого файла, если он существует и это не изображение по умолчанию
 	if oldFilePath != "assets/static/images/placeholder.png" {
 		if err := os.Remove(oldFilePath); err != nil {
 			log.Printf("Error deleting the old file: %v", err)
 		}
 	}
 
-	// Сохранение нового файла на сервере
 	out, err := os.Create(filePath)
 	if err != nil {
 		log.Printf("Error saving file: %v", err)
@@ -275,14 +256,12 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 	}
 	defer out.Close()
 
-	// Копирование содержимого загруженного файла в созданный файл
 	_, err = io.Copy(out, file)
 	if err != nil {
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
-	// Обновление пути к изображению в базе данных
 	_, err = db.Exec("UPDATE users SET profile_image = ? WHERE id = ?", filePath, userID)
 	if err != nil {
 		log.Printf("Error saving the path to an image in database: %v", err)
@@ -290,7 +269,6 @@ func HandleUploadProfileImage(w http.ResponseWriter, r *http.Request, db *sql.DB
 		return
 	}
 
-	// Перенаправление на страницу пользователя
 	http.Redirect(w, r, "/user", http.StatusSeeOther)
 }
 

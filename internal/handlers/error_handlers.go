@@ -13,10 +13,10 @@ func RenderErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 }
 
 func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status int, message string) {
-	// Установите статус ответа
+	// Set the response status
 	w.WriteHeader(status)
 
-	// Получите данные пользователя и категорий для заголовка
+	// Retrieve user and category data for the header
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -31,7 +31,7 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 		}
 	}
 
-	// Получите категории
+	// Retrieve categories
 	rowsCategory, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
 		log.Printf("Error loading categories: %v", err)
@@ -51,7 +51,7 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 		categories = append(categories, category)
 	}
 
-	// Подготовьте данные для шаблона
+	// Prepare data for the template
 	pageData := models.ErrorPageData{
 		ErrorTitle:   http.StatusText(status),
 		ErrorMessage: message,
@@ -59,7 +59,7 @@ func HandleErrorPage(w http.ResponseWriter, r *http.Request, db *sql.DB, status 
 		Categories:   categories,
 	}
 
-	// Парсинг и рендеринг шаблона
+	// Parse and render the template
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/error.html")
 	if err != nil {
 		log.Printf("Error loading template: %v", err)

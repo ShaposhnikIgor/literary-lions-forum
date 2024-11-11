@@ -223,7 +223,6 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получаем параметры category_id и user_id из запроса, если они существуют
 	categoryIDStr := r.URL.Query().Get("category_id")
 	userIDStr := r.URL.Query().Get("user_id")
 
@@ -237,7 +236,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid category ID")
 			return
 		}
-		// Проверка существования категории
+
 		var exists bool
 		err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)", categoryID).Scan(&exists)
 		if err != nil || !exists {
@@ -251,7 +250,7 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			RenderErrorPage(w, r, db, http.StatusBadRequest, "Invalid user ID")
 			return
 		}
-		// Проверка существования пользователя
+
 		var exists bool
 		err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)", userID).Scan(&exists)
 		if err != nil || !exists {
@@ -339,7 +338,6 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Проверка на наличие сессии пользователя
 	var user *models.User
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
@@ -380,7 +378,6 @@ func AllPostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Создаем структуру для передачи в шаблон
 	pageData := models.PostsPageData{
 		Posts:      posts,
 		User:       user,
@@ -414,7 +411,7 @@ func truncate(text string, limit int) string {
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method == http.MethodGet {
-		// Проверка на наличие сессии пользователя
+
 		var user *models.User
 		cookie, err := r.Cookie("session_token")
 		if err == nil {
@@ -458,7 +455,6 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			return
 		}
 
-		// Создаем структуру для передачи в шаблон
 		pageData := models.NewPostPageData{
 			User:       user,
 			Categories: categories,

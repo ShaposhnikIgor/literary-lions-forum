@@ -10,7 +10,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/crypto/bcrypt" // Замените на свой метод хеширования
+	"golang.org/x/crypto/bcrypt"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -134,14 +134,12 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Удаляем сессию из базы данных
 	_, err = db.Exec("DELETE FROM sessions WHERE session_token = ?", cookie.Value)
 	if err != nil {
 		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error deleting the session")
 		return
 	}
 
-	// Удаляем куки с сессионным токеном
 	cookie = &http.Cookie{
 		Name:   "session_token",
 		Value:  "",
@@ -150,6 +148,5 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	http.SetCookie(w, cookie)
 
-	// Перенаправляем на главную страницу
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// User - структура для представления пользователей
 type User struct {
 	ID           int       `db:"id"`
 	Username     string    `db:"username"`
@@ -17,15 +16,13 @@ type User struct {
 	ProfImage    *string   `db:"profile_image"`
 }
 
-// Category - структура для представления категорий
 type Category struct {
 	ID          int            `db:"id"`
 	Name        string         `db:"name"`
-	Description sql.NullString `db:"description"` // так как поле может быть NULL
+	Description sql.NullString `db:"description"`
 	CreatedAt   time.Time      `db:"created_at"`
 }
 
-// Post - структура для представления постов
 type Post struct {
 	ID           int       `db:"id"`
 	UserID       int       `db:"user_id"`
@@ -37,7 +34,6 @@ type Post struct {
 	CategoryName string
 }
 
-// Comment - структура для представления комментариев
 type Comment struct {
 	ID        int       `db:"id"`
 	PostID    int       `db:"post_id"`
@@ -48,25 +44,24 @@ type Comment struct {
 	Username  string
 }
 
-// LikeDislike - структура для представления лайков и дизлайков
 type LikeDislike struct {
 	ID         int       `db:"id"`
 	UserID     int       `db:"user_id"`
 	TargetID   int       `db:"target_id"`
-	TargetType string    `db:"target_type"` // 'post' или 'comment'
-	IsLike     bool      `db:"is_like"`     // TRUE для лайка, FALSE для дизлайка
+	TargetType string    `db:"target_type"`
+	IsLike     bool      `db:"is_like"`
 	CreatedAt  time.Time `db:"created_at"`
 }
 
 type IndexPageData struct {
 	Posts      []Post
-	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	User       *User
 	Categories []Category
 }
 
 type PostsPageData struct {
 	Posts      []Post
-	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	User       *User
 	Categories []Category
 }
 
@@ -88,13 +83,13 @@ type LikeDislikeCount struct {
 }
 
 type NewPostPageData struct {
-	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	User       *User
 	Categories []Category
 }
 
 type LoginPageData struct {
 	Error      string
-	User       *User // Используем указатель, чтобы передавать nil, если пользователь не залогинен
+	User       *User
 	Categories []Category
 }
 
@@ -106,14 +101,14 @@ type ErrorPageData struct {
 }
 
 type RegisterPageData struct {
-	CaptchaQuestion string // Вопрос для отображения капчи
-	User            *User  // Данные пользователя, могут быть nil, если пользователь не залогинен
+	CaptchaQuestion string
+	User            *User
 	Categories      []Category
 	Error           string
 }
 
 type UserPageData struct {
-	User       *User // Данные пользователя, могут быть nil, если пользователь не залогинен
+	User       *User
 	Categories []Category
 }
 
