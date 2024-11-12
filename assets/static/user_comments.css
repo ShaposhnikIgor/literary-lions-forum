@@ -11,9 +11,16 @@ body {
     background-color: #fafafa; /* Light gray background */
     color: #333;
     font-size: 16px;
-    padding: 20px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh; /* Ensure the body takes up full height */
 }
 
+/* Heading styling */
 h1 {
     font-size: 2rem;
     color: #6d4c41; /* Warm brown color */
@@ -21,12 +28,16 @@ h1 {
     text-align: center;
     border-bottom: 2px solid #6d4c41;
     padding-bottom: 10px;
+    width: 100%;
 }
 
 /* Container for comments */
 .container {
     max-width: 900px;
-    margin: 0 auto;
+    width: 100%;  /* Ensure the container fills available space */
+    margin: 20px auto;  /* Center the container */
+    padding-bottom: 50px;  /* Allow space for footer */
+    flex-grow: 1; /* Ensure it takes up available vertical space */
 }
 
 /* Comment styling */
@@ -84,6 +95,18 @@ p {
     color: #9e9e9e;
 }
 
+/* Footer styling */
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     body {
@@ -105,13 +128,4 @@ p {
     .comment p {
         font-size: 0.95rem;
     }
-}
-
-footer {
-    text-align: center;
-    background-color: #8C5B3A;
-    color: #F5EDE2;
-    padding: 10px 0;
-    font-size: 0.9em;
-    margin-top: 20px;
 }

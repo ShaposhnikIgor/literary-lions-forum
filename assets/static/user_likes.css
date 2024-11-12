@@ -8,13 +8,23 @@
 
 /* Body styling */
 body {
-    background-color: #f4f4f4; /* Light gray background */
+    background-color: #fafafa; /* Light gray background */
     color: #333;
     font-size: 16px;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;  /* Ensures the body content flows vertically */
+    min-height: 100vh; /* Ensures the body takes up full height */
+    padding: 0;
+    margin: 0;
 }
 
-/* Header Styling */
+/* Main content wrapper */
+.main-content {
+    flex-grow: 1;  /* Ensures the content takes up available vertical space */
+    width: 100%;
+}
+
+/* Heading styling */
 h1 {
     font-size: 2rem;
     color: #6d4c41; /* Warm brown color */
@@ -22,12 +32,14 @@ h1 {
     text-align: center;
     border-bottom: 2px solid #6d4c41;
     padding-bottom: 10px;
+    width: 100%;
 }
 
 /* Container for likes */
 .container {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 20px auto;
+    width: 100%;  /* Ensure the container fills available space */
 }
 
 /* Like Item Styling */
@@ -73,6 +85,17 @@ p {
     color: #9e9e9e;
 }
 
+/* Footer styling */
+footer {
+    text-align: center;
+    background-color: #8C5B3A;
+    color: #F5EDE2;
+    padding: 10px 0;
+    font-size: 0.9em;
+    width: 100%;
+    margin-top: auto;  /* Ensures footer is always at the bottom */
+}
+
 /* Responsive design for mobile */
 @media (max-width: 768px) {
     body {
@@ -90,13 +113,4 @@ p {
     .like p {
         font-size: 1rem;
     }
-}
-
-footer {
-    text-align: center;
-    background-color: #8C5B3A;
-    color: #F5EDE2;
-    padding: 10px 0;
-    font-size: 0.9em;
-    margin-top: 20px;
 }

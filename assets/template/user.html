@@ -4,90 +4,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User's profile</title>
+    <title>User's Profile</title>
+    <!-- Load general CSS first to allow specific overrides -->
     <link rel="stylesheet" href="/assets/static/user.css">
     <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
     {{template "header" .}}
+
     <div class="container">
-        <h1>User's profile: {{.User.Username}}</h1>
+        <h1>User's Profile: {{.User.Username}}</h1>
         <p>Email: {{.User.Email}}</p>
 
-        <!-- Изображение профиля -->
+        <!-- Profile Picture Section -->
         <section>
-            <h2>Profile's picture</h2>
-            <img src="/{{.User.ProfImage}}" alt="Profile's picture" class="profile-image">
+            <h2>Profile Picture</h2>
+            <img src="/{{.User.ProfImage}}" alt="Profile picture" class="profile-image">
         </section>     
-        
-        <!-- Мои комментарии -->
+
+        <!-- User Posts Section -->
         <section>
-            <h2>Мy posts</h2>
-            <a href="/all_posts?user_id={{.User.ID}}" class="btn">Review my posts</a>
+            <h2>My Posts</h2>
+            <a href="/all_posts?user_id={{.User.ID}}" class="btn">Review My Posts</a>
         </section>
 
-        <!-- Мои комментарии -->
+        <!-- User Comments Section -->
         <section>
-            <h2>My comments</h2>
-            <a href="/user/comments?user_id={{.User.ID}}" class="btn">Review my comments</a>
+            <h2>My Comments</h2>
+            <a href="/user/comments?user_id={{.User.ID}}" class="btn">Review My Comments</a>
         </section>
 
-        <!-- Мои лайки -->
+        <!-- User Likes Section -->
         <section>
-            <h2>My likes</h2>
-            <a href="/user/likes?user_id={{.User.ID}}" class="btn">Review my likes</a>
+            <h2>My Likes</h2>
+            <a href="/user/likes?user_id={{.User.ID}}" class="btn">Review My Likes</a>
         </section>
 
-        <!-- Изменение имени пользователя -->
+        <!-- Username Change Section -->
         <section>
-            <h2>Change user's name</h2>
+            <h2>Change Username</h2>
             <form class="user-form" action="/user/change_username" method="POST">
-                <label for="username">New user's name:</label>
+                <label for="username">New Username:</label>
                 <input type="text" id="username" name="username" value="{{.User.Username}}" required>
-                <button type="submit" class="btn">Change the name</button>
+                <button type="submit" class="btn">Change Username</button>
             </form>
         </section>
 
-        <!-- Изменение пароля -->
+        <!-- Password Change Section -->
         <section>
-            <h2>Change password</h2>
+            <h2>Change Password</h2>
             <form class="user-form" action="/user/change_password" method="POST">
-                <label for="current_password">Current password:</label>
+                <label for="current_password">Current Password:</label>
                 <input type="password" id="current_password" name="current_password" required>
 
-                <label for="new_password">New password:</label>
+                <label for="new_password">New Password:</label>
                 <input type="password" id="new_password" name="new_password" required>
 
-                <label for="confirm_password">Re-enter new password:</label>
+                <label for="confirm_password">Confirm New Password:</label>
                 <input type="password" id="confirm_password" name="confirm_password" required>
 
-                <button type="submit" class="btn">Change password</button>
+                <button type="submit" class="btn">Change Password</button>
             </form>
         </section>
 
-        <!-- Загрузка картинки -->
+        <!-- Profile Picture Upload Section -->
         <section>
-            <h2>Upload profile's picture</h2>
+            <h2>Upload Profile Picture</h2>
             <form class="user-form" action="/user/upload_image" method="POST" enctype="multipart/form-data">
-                <label for="profile_image">Choose the file:</label>
+                <label for="profile_image">Choose File:</label>
                 <input type="file" id="profile_image" name="profile_image" accept="image/*" required>
-                <button type="submit" class="btn">Upload the picture</button>
+                <button type="submit" class="btn">Upload Picture</button>
             </form>
         </section>
 
-        <!-- Добавить информацию о себе -->
+        <!-- Bio Section -->
         <section>
-            <h2>Add personal information</h2>
+            <h2>Personal Information</h2>
             <form class="user-form" action="/user/add_bio" method="POST">
-                <label for="bio">Personal information:</label>
+                <label for="bio">Personal Information:</label>
                 <textarea id="bio" name="bio" rows="5" placeholder="Write something about yourself, hobbies, interests...">{{.User.Bio}}</textarea>
-                <button type="submit" class="btn">Save the data</button>
+                <button type="submit" class="btn">Save Information</button>
             </form>
         </section>
     </div>
+
     <footer>
         <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
     </footer>
+
 </body>
 </html>
 {{end}}

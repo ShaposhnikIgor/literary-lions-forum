@@ -1,7 +1,6 @@
 /* General Header Layout */
 .header {
     background-color: #6b4f3d;
-    /* padding: 20px 30px; */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -12,6 +11,7 @@
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
+    padding: 15px 30px; /* Reduced padding to make header less tall */
 }
 
 .header a.logo {
@@ -129,7 +129,7 @@ nav ul li a:hover {
     align-items: center;
     gap: 30px;
     padding: 20px 30px;
-    width: 100%;
+    width: 100%; /* Ensures the navbar takes full width */
 }
 
 /* .navbar .left-links,

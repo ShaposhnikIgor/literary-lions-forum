@@ -9,24 +9,31 @@
     <link rel="stylesheet" href="/assets/static/header.css">
 </head>
 <body>
-    {{template "header" .}}
-    <div class="container">
-        <h1>User's likes {{.UserID}}</h1>
-        {{range .Likes}}
-            <div class="like">
-                {{if eq .TargetType "post"}}
-                    <p>Post: <a href="/post/{{.TargetID}}">Review a post</a></p>
-                {{else if eq .TargetType "comment"}}
-                    <p>Comments: <a href="/comment/{{.TargetID}}">Review comments</a></p>
-                {{end}}
-            </div>
-        {{else}}
-            <p>No likes.</p>
-        {{end}}
+    <!-- Header Template (Ensure logo and navigation are working) -->
+    {{template "header" .}}  
+
+    <!-- Main content wrapper -->
+    <div class="main-content">
+        <div class="container">
+            <h1>User's likes {{.UserID}}</h1>
+            {{range .Likes}}
+                <div class="like">
+                    {{if eq .TargetType "post"}}
+                        <p>Post: <a href="/post/{{.TargetID}}">Review a post</a></p>
+                    {{else if eq .TargetType "comment"}}
+                        <p>Comments: <a href="/comment/{{.TargetID}}">Review comments</a></p>
+                    {{end}}
+                </div>
+            {{else}}
+                <p>No likes.</p>
+            {{end}}
+        </div>
     </div>
+
     <footer>
         <p>&copy; 2024 Literary Lions Forum | A Place for Book Lovers</p>
     </footer>
+
 </body>
 </html>
 {{end}}
