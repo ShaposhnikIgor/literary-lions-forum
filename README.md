@@ -52,7 +52,7 @@ To get the Literary Lions Forum running locally or in a Docker container, follow
 
 1. **Build the Docker Image**:
     ```bash
-    docker build -t literary-lions .
+    docker build -t literary-jo .
     ```
 2. **Run the Docker Container**:
     ```bash
