@@ -1,14 +1,6 @@
-/* Base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
-
 html, body {
     height: 100%; /* Full height to enable flex layout */
-    margin: 0;
+    /* margin: 0; */
 }
 
 body {
@@ -32,6 +24,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    margin-top: 180px;
 }
 
 h2 {

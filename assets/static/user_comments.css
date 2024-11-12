@@ -35,9 +35,10 @@ h1 {
 .container {
     max-width: 900px;
     width: 100%;  /* Ensure the container fills available space */
-    margin: 20px auto;  /* Center the container */
+    margin: 20px;  /* Center the container */
     padding-bottom: 50px;  /* Allow space for footer */
     flex-grow: 1; /* Ensure it takes up available vertical space */
+    margin-top: 180px;
 }
 
 /* Comment styling */

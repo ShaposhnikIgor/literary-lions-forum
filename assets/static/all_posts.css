@@ -38,10 +38,11 @@ a:hover {
     max-width: 900px;
     margin: 20px auto;
     padding: 20px;
-    background-color: rgba(255, 248, 240, 0.9); /* Light semi-transparent background */
+    background-color: rgba(255, 248, 240, 0.9); 
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 140px;
+    margin-top: 170px;    
+    flex-grow: 1;
 }
 
 .post {

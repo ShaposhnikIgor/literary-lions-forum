@@ -225,15 +225,43 @@ func UserLikesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Fetch categories from the database
+	rowsCategory, err := db.Query("SELECT id, name FROM categories")
+	if err != nil {
+		log.Printf("Error loading categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
+		return
+	}
+	defer rowsCategory.Close()
+
+	var categories []models.Category
+	for rowsCategory.Next() {
+		var category models.Category
+		if err := rowsCategory.Scan(&category.ID, &category.Name); err != nil {
+			log.Printf("Error reading categories: %v", err)
+			RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
+			return
+		}
+		categories = append(categories, category)
+	}
+
+	if err := rowsCategory.Err(); err != nil {
+		log.Printf("Error parsing categories: %v", err)
+		RenderErrorPage(w, r, db, http.StatusInternalServerError, "Error loading categories")
+		return
+	}
+
 	// Render the template with the user's likes
 	pageData := struct {
-		UserID int
-		Likes  []models.LikeDislike
-		User   *models.User
+		UserID     int
+		Likes      []models.LikeDislike
+		User       *models.User
+		Categories []models.Category
 	}{
-		UserID: userID,
-		Likes:  likes,
-		User:   user,
+		UserID:     userID,
+		Likes:      likes,
+		User:       user,
+		Categories: categories,
 	}
 
 	tmpl, err := template.ParseFiles("assets/template/header.html", "assets/template/user_likes.html")
