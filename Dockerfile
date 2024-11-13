@@ -1,30 +1,37 @@
-# Указание версии Go как аргумента
+# Указание версии Go и базового образа как аргументов
 ARG GO_VERSION
+ARG BASE_IMAGE
+
+# Этап 1: Сборка
 FROM golang:${GO_VERSION} AS builder
 
 WORKDIR /app
 
-# Install necessary dependencies for CGO (SQLite requires gcc and libsqlite3-dev)
+# Установка зависимостей для CGO (необходим gcc для SQLite)
 RUN apt-get update && apt-get install -y gcc libsqlite3-dev
 
-# Copy Go module files and download dependencies
+# Копирование файлов модулей и загрузка зависимостей
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code
+# Копирование исходного кода
 COPY . .
 
-# Enable CGO and set Go build flags
+# Установка флагов сборки для CGO
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o literary-jo main.go
 
-# Stage 2: Final runtime environment
-FROM ubuntu:latest
+# Этап 2: Окончательная среда выполнения
+FROM ${BASE_IMAGE}
 WORKDIR /app
 
-# Install certificates and required libraries for compatibility
-RUN apt-get update && apt-get install -y ca-certificates libsqlite3-0 && rm -rf /var/lib/apt/lists/*
+# Установка сертификатов и необходимых библиотек для совместимости
+RUN if [ "${BASE_IMAGE}" = "alpine" ]; then \
+      apk --no-cache add ca-certificates sqlite-libs; \
+    elif [ "${BASE_IMAGE}" = "debian" ] || [ "${BASE_IMAGE}" = "ubuntu" ]; then \
+      apt-get update && apt-get install -y ca-certificates libsqlite3-0 && rm -rf /var/lib/apt/lists/*; \
+    fi
 
-# Copy the compiled binary and necessary assets from the builder stage
+# Копирование скомпилированного бинарного файла и необходимых ресурсов
 COPY --from=builder /app/literary-jo .
 COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/internal/db/forum.db ./internal/db/forum.db

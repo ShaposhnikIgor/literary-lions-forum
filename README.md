@@ -51,10 +51,25 @@ To get the Literary Lions Forum running locally or in a Docker container, follow
 ### 🐳 Docker Setup
 
 1.  **Run the Docker Container and Build the Docker Image**:
+
+    For Alpine:
     ```bash
     chmod +x build.sh
-    ./build.sh
+    ./build.sh alpine:latest
     ```
+
+    For Ubuntu:
+     ```bash
+    chmod +x build.sh
+    ./build.sh ubuntu:latest
+    ```
+
+    For Debian:
+     ```bash
+    chmod +x build.sh
+    ./build.sh debian:latest
+    ```
+
 2. **Open in Browser**:
     Navigate to http://localhost:8080
 
