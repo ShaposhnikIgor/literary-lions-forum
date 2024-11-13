@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -113,7 +114,8 @@ func HandleChangeUsername(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	newUsername := r.FormValue("username")
+	// newUsername := r.FormValue("username")
+	newUsername := strings.TrimSpace(r.FormValue("username"))
 
 	_, err = db.Exec("UPDATE users SET username = ? WHERE id = ?", newUsername, userID)
 	if err != nil {
@@ -137,9 +139,13 @@ func HandleChangePassword(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	currentPassword := r.FormValue("current_password")
-	newPassword := r.FormValue("new_password")
-	confirmPassword := r.FormValue("confirm_password")
+	// currentPassword := r.FormValue("current_password")
+	// newPassword := r.FormValue("new_password")
+	// confirmPassword := r.FormValue("confirm_password")
+
+	currentPassword := strings.TrimSpace(r.FormValue("current_password"))
+	newPassword := strings.TrimSpace(r.FormValue("new_password"))
+	confirmPassword := strings.TrimSpace(r.FormValue("confirm_password"))
 
 	if newPassword != confirmPassword {
 		RenderErrorPage(w, r, db, http.StatusBadRequest, "Passwords don't match")

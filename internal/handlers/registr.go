@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"time"
-
 	"net/http"
+	"strings"
+	"time"
 
 	models "literary-lions/internal/models"
 	"literary-lions/internal/utils"
@@ -28,7 +28,11 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method == http.MethodPost {
 		// Get CAPTCHA and form inputs
 		captchaInput := r.FormValue("captcha")
-		username, password, confirmPassword, email := r.FormValue("username"), r.FormValue("password"), r.FormValue("confirmPassword"), r.FormValue("email")
+
+		username := strings.TrimSpace(r.FormValue("username"))
+		password := strings.TrimSpace(r.FormValue("password"))
+		confirmPassword := strings.TrimSpace(r.FormValue("confirmPassword"))
+		email := strings.TrimSpace(r.FormValue("email"))
 
 		// Validate CAPTCHA
 		captchaValid, err := validateCaptcha(r, captchaInput)
@@ -39,6 +43,30 @@ func HandleRegistration(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 		if !captchaValid {
 			errorMessage = "Incorrect respond to captcha"
+			serveRegistrationPage(w, r, db, errorMessage)
+			return
+		}
+
+		if username == "" {
+			errorMessage = "Username cannot be empty"
+			serveRegistrationPage(w, r, db, errorMessage)
+			return
+		}
+
+		if password == "" {
+			errorMessage = "Password cannot be empty"
+			serveRegistrationPage(w, r, db, errorMessage)
+			return
+		}
+
+		if email == "" {
+			errorMessage = "Email cannot be empty"
+			serveRegistrationPage(w, r, db, errorMessage)
+			return
+		}
+
+		if confirmPassword == "" {
+			errorMessage = "ConfirmPassword cannot be empty"
 			serveRegistrationPage(w, r, db, errorMessage)
 			return
 		}

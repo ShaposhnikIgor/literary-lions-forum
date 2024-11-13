@@ -1,5 +1,7 @@
-# Stage 1: Build the application
-FROM golang:1.20 AS builder
+# Указание версии Go как аргумента
+ARG GO_VERSION
+FROM golang:${GO_VERSION} AS builder
+
 WORKDIR /app
 
 # Install necessary dependencies for CGO (SQLite requires gcc and libsqlite3-dev)
