@@ -7,7 +7,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// InitDB initializes the database connection and runs migrations
+// to create necessary tables. If the database is empty, mock data is added.
 func InitDB(filepath string) *sql.DB {
+	// Open a connection to the SQLite database
 	db, err := sql.Open("sqlite3", filepath)
 	if err != nil {
 		log.Fatal(err)
@@ -25,7 +28,9 @@ func InitDB(filepath string) *sql.DB {
 	return db
 }
 
+// createTables creates necessary tables in the database if they don't exist.
 func createTables(db *sql.DB) error {
+	// SQL query to create 'users' table
 	createUsersTable := `
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +43,7 @@ func createTables(db *sql.DB) error {
 		profile_image TEXT DEFAULT 'assets/static/images/placeholder.png'
     );`
 
+	// SQL query to create 'categories' table
 	createCategoriesTable := `
 	CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +52,7 @@ func createTables(db *sql.DB) error {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`
 
+	// SQL query to create 'posts' table
 	createPostsTable := `
     CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,6 +65,7 @@ func createTables(db *sql.DB) error {
         FOREIGN KEY (category_id) REFERENCES categories(id)
     );`
 
+	// SQL query to create 'comments' table
 	createCommentsTable := `
     CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,6 +77,7 @@ func createTables(db *sql.DB) error {
         FOREIGN KEY (user_id) REFERENCES users(id)
     );`
 
+	// SQL query to create 'likes' table
 	createLikesTable := `
 	CREATE TABLE IF NOT EXISTS likes_dislikes (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,50 +90,58 @@ func createTables(db *sql.DB) error {
 		UNIQUE (user_id, target_id, target_type)
 	);`
 
+	// SQL query to create 'sessions' table
 	createSessionsTable := `
     CREATE TABLE IF NOT EXISTS sessions (
 		user_id INTEGER,
 		email TEXT UNIQUE,
 		session_token TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-		
     );`
 
+	// Execute the SQL query to create 'users' table
 	_, err := db.Exec(createUsersTable)
 	if err != nil {
 		return err
 	}
 
+	// Execute the SQL query to create 'sessions' table
 	_, err = db.Exec(createSessionsTable)
 	if err != nil {
 		return err
 	}
 
+	// Execute the SQL query to create 'categories' table
 	_, err = db.Exec(createCategoriesTable)
 	if err != nil {
 		return err
 	}
 
+	// Execute the SQL query to create 'posts' table
 	_, err = db.Exec(createPostsTable)
 	if err != nil {
 		return err
 	}
 
+	// Execute the SQL query to create 'comments' table
 	_, err = db.Exec(createCommentsTable)
 	if err != nil {
 		return err
 	}
 
+	// Execute the SQL query to create 'likes' table
 	_, err = db.Exec(createLikesTable)
 	if err != nil {
 		return err
 	}
 
+	// Return nil if no errors occurred during table creation
 	return nil
 }
 
+// addMockData adds mock data to the database if no users exist.
 func addMockData(db *sql.DB) {
-	// Check if any users exist
+	// Check if any users exist in the database
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
 	if err != nil {
@@ -132,10 +149,11 @@ func addMockData(db *sql.DB) {
 		return
 	}
 
+	// If no users exist, insert mock data
 	if count == 0 {
 		log.Println("No users found, inserting mock data...")
 
-		// Insert mock users
+		// Insert mock users into the 'users' table
 		_, err = db.Exec(`INSERT INTO users (username, password_hash, email) VALUES
             ('alice', 'fakehashedpassword1', 'a@q'),
             ('bob', 'fakehashedpassword2', 'a@h'),
@@ -145,7 +163,7 @@ func addMockData(db *sql.DB) {
 			return
 		}
 
-		// Inserting mock categories
+		// Insert mock categories into the 'categories' table
 		_, err = db.Exec(`INSERT INTO categories (id, name, description) VALUES
 		(1, 'General Discussion', 'All about daily conversations and socializing.'),
 		(2, 'Books & Reviews', 'Book discussions, reviews, and recommendations.'),
@@ -157,7 +175,7 @@ func addMockData(db *sql.DB) {
 			return
 		}
 
-		// Inserting mock posts
+		// Insert mock posts into the 'posts' table
 		_, err = db.Exec(`INSERT INTO posts (id, user_id, title, body, category_id) VALUES
 		(1, 1, 'How Fiction Mirrors Reality', 'Fiction often holds a mirror to our society, reflecting real-world issues like social justice, relationships, and the human condition. What are some books that you think do this effectively?', 1),
 		(2, 2, 'The Role of Literature in Society', 'Literature has the power to shape ideas and influence culture. How do you think books have influenced major social movements?', 1),
@@ -177,7 +195,7 @@ func addMockData(db *sql.DB) {
 
 		(13, 1, 'The Legacy of Shakespeare', 'Shakespeare’s works have influenced generations of writers and artists. Which of his plays do you think holds the most relevance today, and why?', 5),
 		(14, 2, 'Agatha Christie: The Queen of Mystery', 'Agatha Christie’s mysteries remain popular even decades after their release. What makes her stories so timeless, and which is your favorite?', 5),
-		(15, 3, 'The Influence of J.K. Rowling on Modern Fantasy', 'Rowling’s Harry Potter series defined a generation. How do you think her work has impacted the fantasy genre as a whole?', 5);`)
+		(15, 3, 'Exploring the Life of Toni Morrison', 'Toni Morrison’s powerful prose and exploration of African American history continues to resonate. Let’s talk about her life and works.', 5);`)
 		if err != nil {
 			log.Println("Error inserting mock posts:", err)
 			return
