@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"strings"
 )
 
 // CreateCommentHandler handles the creation of a comment on a post
@@ -22,6 +23,8 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Extract form data from the request
 	postIDStr := r.FormValue("post_id")  // Get the post ID from the form
 	body := r.FormValue("body")          // Get the body of the comment from the form
+
+	body = strings.TrimSpace(body) // Ensure no leading/trailing spaces
 
 	// Validate that both post ID and comment body are provided
 	if postIDStr == "" || body == "" {

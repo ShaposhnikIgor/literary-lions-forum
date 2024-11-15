@@ -43,7 +43,7 @@
         <!-- Comment form for logged-in users -->
         <form action="/comment" method="POST">
             <input type="hidden" name="post_id" value="{{.Post.ID}}">
-            <textarea name="body" required></textarea>
+            <textarea name="body" required title="Please write a comment before submitting"></textarea>
             <button type="submit">Send</button>
         </form>
     {{else}}
