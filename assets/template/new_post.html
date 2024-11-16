@@ -12,12 +12,19 @@
     {{template "header" .}}
     <div class="container">
     <h1>Create new post</h1>
+
+    {{if .ErrorMessage}}
+    <div class="error-message">{{.ErrorMessage}}</div>
+    {{end}}
+
     <form class="new-post-form" action="/new-post" method="POST">
         <label for="title">The header:</label>
-        <input type="text" name="title" id="title" required>
+        <input type="text" name="title" id="title" required pattern=".*\S.*"
+        title="Input cannot consist only of whitespace">
         <br>
         <label for="body">Text:</label>
-        <textarea name="body" id="body" required></textarea>
+        <textarea name="body" id="body" required pattern=".*\S.*"
+        title="Input cannot consist only of whitespace"></textarea>
         <br>
         <label for="category_id">Categories:</label>
         <select name="category_id" id="category_id" required>

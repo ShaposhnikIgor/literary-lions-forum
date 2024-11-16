@@ -75,6 +75,7 @@ type PostPageData struct {
 	Categories    []Category
 	Author        string
 	Category      string
+	ErrorMessage  string
 }
 
 type LikeDislikeCount struct {
@@ -83,8 +84,9 @@ type LikeDislikeCount struct {
 }
 
 type NewPostPageData struct {
-	User       *User
-	Categories []Category
+	User         *User
+	Categories   []Category
+	ErrorMessage string
 }
 
 type LoginPageData struct {

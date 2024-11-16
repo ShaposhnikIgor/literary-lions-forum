@@ -40,10 +40,14 @@
 
 <h3>Add comment</h3>
     {{if .User}}
+        {{if .ErrorMessage}}
+            <p style="color: red;">{{.ErrorMessage}}</p>
+        {{end}}
         <!-- Comment form for logged-in users -->
         <form action="/comment" method="POST">
             <input type="hidden" name="post_id" value="{{.Post.ID}}">
-            <textarea name="body" required title="Please write a comment before submitting"></textarea>
+            <textarea name="body" required pattern=".*\S.*"
+            title="Input cannot consist only of whitespace"></textarea>
             <button type="submit">Send</button>
         </form>
     {{else}}
